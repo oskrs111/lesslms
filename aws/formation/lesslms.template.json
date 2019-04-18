@@ -2,6 +2,216 @@
     "AWSTemplateFormatVersion": "2010-09-09",
     "Description": "lesslms CloudFormation template 18.04.2019",
     "Resources": {
+
+        "tableCourses": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "sourceId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "relatedId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "sourceId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "relatedId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "courses"
+            }
+        },
+
+        "tableUsers": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "userId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "sourceId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "userId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "sourceId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "users"
+            }
+        },
+
+        "tablePublished": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "sourceId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "versionId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "sourceId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "versionId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "published"
+            }
+        },
+
+        "tableStatement": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "statementId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "timestamp",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "statementId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "timestamp",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "xStatement"
+            }
+        },
+
+        "tableFilter": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "propertyId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "statementId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "propertyId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "statementId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "xFilter"
+            }
+        },
+
+        "tableState": {
+            "Type": "AWS::DynamoDB::Table",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "AttributeDefinitions": [{
+                        "AttributeName": "activityId",
+                        "AttributeType": "S"
+                    },
+                    {
+                        "AttributeName": "agentId",
+                        "AttributeType": "S"
+                    }
+                ],
+                "KeySchema": [{
+                        "AttributeName": "activityId",
+                        "KeyType": "HASH"
+                    },
+                    {
+                        "AttributeName": "agentId",
+                        "KeyType": "RANGE"
+                    }
+                ],
+                "GlobalSecondaryIndexes": [{
+                    "IndexName": "xStateGSI",
+                    "KeySchema": [{
+                            "AttributeName": "agentId",
+                            "KeyType": "HASH"
+                        },
+                        {
+                            "AttributeName": "activityId",
+                            "KeyType": "RANGE"
+                        }
+                    ],
+                    "Projection": { "ProjectionType": "KEYS_ONLY" },
+                    "ProvisionedThroughput": {
+                        "ReadCapacityUnits": "1",
+                        "WriteCapacityUnits": "1"
+                    }
+                }],
+                "ProvisionedThroughput": {
+                    "ReadCapacityUnits": "1",
+                    "WriteCapacityUnits": "1"
+                },
+                "TableName": "xState"
+            }
+        },
+
         "lmsLambda": {
             "Type": "AWS::Lambda::Function",
             "Properties": {
@@ -340,7 +550,9 @@
         "lessApi": {
             "Type": "AWS::ApiGateway::RestApi",
             "Properties": {
-                "Name": "lesslmsAPI",
+                "Name": {
+                    "Ref": "launchName"
+                },
                 "Description": "api",
                 "FailOnWarnings": true
             }
@@ -632,6 +844,32 @@
                 "MethodResponses": [{
                     "StatusCode": 200
                 }]
+            }
+        },
+
+        "lmsCognitoPool": {
+            "Type": "AWS::Cognito::UserPool",
+            "Properties": {
+                "AutoVerifiedAttributes": ["email"],
+                "EmailVerificationMessage": "Welcome to lesslms!\r\nYour username is {username} and temporary password is {####}.",
+                "EmailVerificationSubject": "lesslms verification request",
+                "MfaConfiguration": "OFF",
+                "UsernameAttributes": ["email"],
+                "UserPoolName": { "Ref": "launchName" }
+            }
+        },
+
+        "lmsCognitoUser": {
+            "Type": "AWS::Cognito::UserPoolUser",
+            "DependsOn": [
+                "lmsCognitoPool"
+            ],
+            "Properties": {
+                "DesiredDeliveryMediums": ["EMAIL"],
+                "ForceAliasCreation": false,
+                "UserAttributes": [{ "Name": "profile", "Value": "administrator" }],
+                "Username": { "Ref": "adminEmail" },
+                "UserPoolId": { "Ref": "lmsCognitoPool" }
             }
         }
     },
