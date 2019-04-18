@@ -901,11 +901,7 @@
         "launchName": {
             "Type": "String",
             "Default": "lesslms-00000000"
-        },
-        "adminName": {
-            "Type": "String",
-            "Default": "admin"
-        },
+        },  
         "adminEmail": {
             "Type": "String",
             "Default": "osanzl@uoc.edu"
