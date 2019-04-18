@@ -1,0 +1,19 @@
+{
+  "name": "lesslms-user",
+  "version": "0.0.1",
+  "description": "Lambda code for lesslms /user requests processing.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "serverless",
+    "api-gateway",
+    "lesslms",
+    "lambda",
+    "aws",
+    "lms"
+  ],
+  "author": "Oscar Sanz Llopis",
+  "license": "MIT"
+}

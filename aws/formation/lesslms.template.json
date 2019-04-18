@@ -1,0 +1,676 @@
+{
+    "AWSTemplateFormatVersion": "2010-09-09",
+    "Description": "lesslms CloudFormation template 18.04.2019",
+    "Resources": {
+        "lmsLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "launchName"
+                    },
+                    "S3Key": "lambda/lms.zip"
+                },
+                "Description": "lesslms Lambda function",
+                "FunctionName": "lmsLambda",
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10"
+            }
+        },
+        "xapiLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "launchName"
+                    },
+                    "S3Key": "lambda/xapi.zip"
+                },
+                "Description": "lesslms Lambda function",
+                "FunctionName": "xapiLambda",
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10"
+            }
+        },
+        "userLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "launchName"
+                    },
+                    "S3Key": "lambda/user.zip"
+                },
+                "Description": "lesslms Lambda function",
+                "FunctionName": "userLambda",
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10"
+            }
+        },
+        "authLambda": {
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "S3Bucket": {
+                        "Ref": "launchName"
+                    },
+                    "S3Key": "lambda/auth.zip"
+                },
+                "Description": "lesslms Lambda function",
+                "FunctionName": "authLambda",
+                "Handler": "index.handler",
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaExecutionRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10"
+            }
+        },
+        "authLambdaAutorizer": {
+            "Type": "AWS::ApiGateway::Authorizer",
+            "Properties": {
+                "AuthorizerResultTtlInSeconds": 300,
+                "AuthorizerUri": {
+                    "Fn::Join": [
+                        "", [
+                            "arn:aws:apigateway:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":lambda:path/2015-03-31/functions/",
+                            {
+                                "Fn::GetAtt": [
+                                    "authLambda",
+                                    "Arn"
+                                ]
+                            },
+                            "/invocations"
+                        ]
+                    ]
+                },
+                "IdentitySource": "method.request.header.token",
+                "Name": "userAuthorizer",
+                "ProviderARNs": [],
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "Type": "TOKEN"
+            }
+        },
+        "LambdaExecutionRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "lambda.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Policies": [{
+                    "PolicyName": "LambdaPolicy",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": [
+                                "dynamodb:*",
+                                "cognito-idp:*",
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutLogEvents",
+                                "logs:GetLogEvents",
+                                "logs:FilterLogEvents"
+                            ],
+                            "Resource": "*"
+                        }]
+                    }
+                }]
+            }
+        },
+        "lmsLambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:invokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "lmsLambda",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "", [
+                            "arn:aws:execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "lessApi"
+                            },
+                            "/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "xapiLambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:invokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "xapiLambda",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "", [
+                            "arn:aws:execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "lessApi"
+                            },
+                            "/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "userLambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:invokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "userLambda",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "", [
+                            "arn:aws:execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "lessApi"
+                            },
+                            "/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "authLambdaPermission": {
+            "Type": "AWS::Lambda::Permission",
+            "Properties": {
+                "Action": "lambda:invokeFunction",
+                "FunctionName": {
+                    "Fn::GetAtt": [
+                        "authLambda",
+                        "Arn"
+                    ]
+                },
+                "Principal": "apigateway.amazonaws.com",
+                "SourceArn": {
+                    "Fn::Join": [
+                        "", [
+                            "arn:aws:execute-api:",
+                            {
+                                "Ref": "AWS::Region"
+                            },
+                            ":",
+                            {
+                                "Ref": "AWS::AccountId"
+                            },
+                            ":",
+                            {
+                                "Ref": "lessApi"
+                            },
+                            "/*"
+                        ]
+                    ]
+                }
+            }
+        },
+        "ApiGatewayCloudWatchLogsRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "apigateway.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "Policies": [{
+                    "PolicyName": "ApiGatewayLogsPolicy",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": [
+                                "logs:CreateLogGroup",
+                                "logs:CreateLogStream",
+                                "logs:DescribeLogGroups",
+                                "logs:DescribeLogStreams",
+                                "logs:PutLogEvents",
+                                "logs:GetLogEvents",
+                                "logs:FilterLogEvents"
+                            ],
+                            "Resource": "*"
+                        }]
+                    }
+                }]
+            }
+        },
+        "ApiGatewayAccount": {
+            "Type": "AWS::ApiGateway::Account",
+            "Properties": {
+                "CloudWatchRoleArn": {
+                    "Fn::GetAtt": [
+                        "ApiGatewayCloudWatchLogsRole",
+                        "Arn"
+                    ]
+                }
+            }
+        },
+        "lessApi": {
+            "Type": "AWS::ApiGateway::RestApi",
+            "Properties": {
+                "Name": "lesslmsAPI",
+                "Description": "api",
+                "FailOnWarnings": true
+            }
+        },
+        "lessApiStage": {
+            "DependsOn": [
+                "ApiGatewayAccount"
+            ],
+            "Type": "AWS::ApiGateway::Stage",
+            "Properties": {
+                "DeploymentId": {
+                    "Ref": "ApiDeployment"
+                },
+                "MethodSettings": [{
+                    "DataTraceEnabled": true,
+                    "HttpMethod": "*",
+                    "LoggingLevel": "INFO",
+                    "ResourcePath": "/*"
+                }],
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "StageName": "less"
+            }
+        },
+        "ApiDeployment": {
+            "Type": "AWS::ApiGateway::Deployment",
+            "DependsOn": [
+                "lmsProxy",
+                "xapiProxy",
+                "userProxy"
+            ],
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                }
+            }
+        },
+        "lmsResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "lessApi",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "lms"
+            }
+        },
+        "xapiResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "lessApi",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "xapi"
+            }
+        },
+        "userResource": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Fn::GetAtt": [
+                        "lessApi",
+                        "RootResourceId"
+                    ]
+                },
+                "PathPart": "user"
+            }
+        },
+        "lmsResourceProxy": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Ref": "lmsResource"
+                },
+                "PathPart": "{proxy+}"
+            }
+        },
+        "xapiResourceProxy": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Ref": "xapiResource"
+                },
+                "PathPart": "{proxy+}"
+            }
+        },
+        "userResourceProxy": {
+            "Type": "AWS::ApiGateway::Resource",
+            "Properties": {
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "ParentId": {
+                    "Ref": "userResource"
+                },
+                "PathPart": "{proxy+}"
+            }
+        },
+        "lmsProxy": {
+            "DependsOn": "lmsLambdaPermission",
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId": {
+                    "Ref": "authLambdaAutorizer"
+                },
+                "HttpMethod": "ANY",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Join": [
+                            "", [
+                                "arn:aws:apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "lmsLambda",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    },
+                    "IntegrationResponses": [{
+                        "StatusCode": 200
+                    }],
+                    "RequestTemplates": {
+                        "application/json": {
+                            "Fn::Join": [
+                                "", [
+                                    "{",
+                                    "  \"name\": \"$input.params('name')\"",
+                                    "}"
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "RequestParameters": {
+                    "method.request.querystring.name": false
+                },
+                "ResourceId": {
+                    "Ref": "lmsResourceProxy"
+                },
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "MethodResponses": [{
+                    "StatusCode": 200
+                }]
+            }
+        },
+        "xapiProxy": {
+            "DependsOn": "xapiLambdaPermission",
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "CUSTOM",
+                "AuthorizerId": {
+                    "Ref": "authLambdaAutorizer"
+                },
+                "HttpMethod": "ANY",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Join": [
+                            "", [
+                                "arn:aws:apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "xapiLambda",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    },
+                    "IntegrationResponses": [{
+                        "StatusCode": 200
+                    }],
+                    "RequestTemplates": {
+                        "application/json": {
+                            "Fn::Join": [
+                                "", [
+                                    "{",
+                                    "  \"name\": \"$input.params('name')\"",
+                                    "}"
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "RequestParameters": {
+                    "method.request.querystring.name": false
+                },
+                "ResourceId": {
+                    "Ref": "xapiResourceProxy"
+                },
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "MethodResponses": [{
+                    "StatusCode": 200
+                }]
+            }
+        },
+        "userProxy": {
+            "DependsOn": "xapiLambdaPermission",
+            "Type": "AWS::ApiGateway::Method",
+            "Properties": {
+                "AuthorizationType": "NONE",
+                "HttpMethod": "ANY",
+                "Integration": {
+                    "Type": "AWS_PROXY",
+                    "IntegrationHttpMethod": "POST",
+                    "Uri": {
+                        "Fn::Join": [
+                            "", [
+                                "arn:aws:apigateway:",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ":lambda:path/2015-03-31/functions/",
+                                {
+                                    "Fn::GetAtt": [
+                                        "userLambda",
+                                        "Arn"
+                                    ]
+                                },
+                                "/invocations"
+                            ]
+                        ]
+                    },
+                    "IntegrationResponses": [{
+                        "StatusCode": 200
+                    }],
+                    "RequestTemplates": {
+                        "application/json": {
+                            "Fn::Join": [
+                                "", [
+                                    "{",
+                                    "  \"name\": \"$input.params('name')\"",
+                                    "}"
+                                ]
+                            ]
+                        }
+                    }
+                },
+                "RequestParameters": {
+                    "method.request.querystring.name": false
+                },
+                "ResourceId": {
+                    "Ref": "userResourceProxy"
+                },
+                "RestApiId": {
+                    "Ref": "lessApi"
+                },
+                "MethodResponses": [{
+                    "StatusCode": 200
+                }]
+            }
+        }
+    },
+    "Outputs": {
+        "RootUrl": {
+            "Description": "Root URL of the API gateway",
+            "Value": {
+                "Fn::Join": [
+                    "", [
+                        "https://",
+                        {
+                            "Ref": "lessApi"
+                        },
+                        ".execute-api.",
+                        {
+                            "Ref": "AWS::Region"
+                        },
+                        ".amazonaws.com/",
+                        {
+                            "Ref": "lessApiStage"
+                        },
+                        "/"
+                    ]
+                ]
+            }
+        }
+    },
+    "Parameters": {
+        "launchName": {
+            "Type": "String",
+            "Default": "lesslms-00000000"
+        },
+        "adminName": {
+            "Type": "String",
+            "Default": "admin"
+        },
+        "adminEmail": {
+            "Type": "String",
+            "Default": "osanzl@uoc.edu"
+        }
+    }
+}
