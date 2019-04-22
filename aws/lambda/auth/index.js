@@ -1,42 +1,52 @@
-exports.handler =  function(event, context, callback) {
-    var token = event.authorizationToken;
-    switch (token) {
-        case 'allow':
-            callback(null, generatePolicy('user', 'Allow', event.methodArn));
-            break;
-        case 'deny':
-            callback(null, generatePolicy('user', 'Deny', event.methodArn));
-            break;
-        case 'unauthorized':
-            callback("Unauthorized");   // Return a 401 Unauthorized response
-            break;
-        default:
-            callback("Error: Invalid token"); // Return a 500 Invalid token response
-    }
+let AWS = require('aws-sdk');
+let cognito = new AWS.CognitoIdentityServiceProvider();
+
+exports.handler = function (event, context, callback) {
+    console.log('<<<__________________authLambda:', event);
+    cognito.getUser({
+        'AccessToken': event.authorizationToken,
+    }, function (error, data) {
+        if (error) {
+            console.log('Error:',error);
+            callback(null, generatePolicy(principalId, 'Deny', event.methodArn));
+        } else {
+            var principalId = getUserId(data.UserAttributes);
+            callback(null, generatePolicy(principalId, 'Allow', event.methodArn));
+            console.log('<<<__________________authLambda-success:', data);
+        }
+    });
 };
 
-// Help function to generate an IAM policy
-var generatePolicy = function(principalId, effect, resource) {
+ function getUserId(attributes) {
+    for (var i in attributes) {
+       var string = JSON.stringify(attributes[i]);
+       var objectValue = JSON.parse(string);
+       if (objectValue.Name == 'sub') {
+        return objectValue.Value;
+       }
+    }
+}
+
+var generatePolicy = function(principalId, effect) {
     var authResponse = {};
-    
-    authResponse.principalId = principalId;
-    if (effect && resource) {
+    if (effect != undefined) {
         var policyDocument = {};
         policyDocument.Version = '2012-10-17'; 
-        policyDocument.Statement = [];
-        var statementOne = {};
-        statementOne.Action = 'execute-api:Invoke'; 
-        statementOne.Effect = effect;
-        statementOne.Resource = resource;
-        policyDocument.Statement[0] = statementOne;
+        policyDocument.Statement = [
+            {
+                Action: "execute-api:Invoke",
+                Resource: "*",
+                Effect: effect
+            }
+        ];
         authResponse.policyDocument = policyDocument;
     }
     
-    // Optional output with custom properties of the String, Number or Boolean type.
     authResponse.context = {
-        "stringKey": "stringval",
-        "numberKey": 123,
+        "stringKey": '',
+        "numberKey": principalId,
         "booleanKey": true
     };
+    
     return authResponse;
 }

@@ -1,7 +1,7 @@
 {
-  "name": "lesslms-user",
+  "name": "lesslms-lms",
   "version": "0.0.1",
-  "description": "Lambda code for lesslms /user requests processing.",
+  "description": "Lambda helper code for lesslms /cognitoPool access.",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -15,9 +15,5 @@
     "lms"
   ],
   "author": "Oscar Sanz Llopis",
-  "license": "MIT",
-  "dependencies": {
-    "amazon-cognito-identity-js": "^3.0.11",
-    "node-fetch": "^2.3.0"
-  }
+  "license": "MIT"
 }
