@@ -8,26 +8,15 @@ exports.handler = function (event, context, callback) {
     }, function (error, data) {
         if (error) {
             console.log('Error:',error);
-            callback(null, generatePolicy(principalId, 'Deny', event.methodArn));
+            callback(null, generatePolicy('Deny', {}));
         } else {
-            var principalId = getUserId(data.UserAttributes);
-            callback(null, generatePolicy(principalId, 'Allow', event.methodArn));
+            callback(null, generatePolicy('Allow', data.UserAttributes));
             console.log('<<<__________________authLambda-success:', data);
         }
     });
 };
 
- function getUserId(attributes) {
-    for (var i in attributes) {
-       var string = JSON.stringify(attributes[i]);
-       var objectValue = JSON.parse(string);
-       if (objectValue.Name == 'sub') {
-        return objectValue.Value;
-       }
-    }
-}
-
-var generatePolicy = function(principalId, effect) {
+var generatePolicy = function(effect, attributes) {
     var authResponse = {};
     if (effect != undefined) {
         var policyDocument = {};
@@ -42,11 +31,13 @@ var generatePolicy = function(principalId, effect) {
         authResponse.policyDocument = policyDocument;
     }
     
-    authResponse.context = {
-        "stringKey": '',
-        "numberKey": principalId,
-        "booleanKey": true
-    };
-    
+    authResponse.context = {};
+    if(effect == 'Allow'){
+        for(let a of attributes){
+            //OSLL: return with user attributes in context
+            authResponse.context[a.Name] = a.Value;
+        }    
+    }
+
     return authResponse;
 }
