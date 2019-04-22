@@ -7,6 +7,10 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+#lesslms deployment
+release/aws/formation/*
+release/aws/lambda/*
+
 # Runtime data
 pids
 *.pid
