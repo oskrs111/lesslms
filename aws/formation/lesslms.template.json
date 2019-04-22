@@ -266,9 +266,11 @@
                 "Description": "lesslms Lambda function",
                 "FunctionName": "userLambda",
                 "Handler": "index.handler",
+                "MemorySize": 512,
+                "Timeout": 10,
                 "Role": {
                     "Fn::GetAtt": [
-                        "LambdaExecutionRole",
+                        "LambdaInvokeRole",
                         "Arn"
                     ]
                 },
@@ -299,7 +301,7 @@
         "authLambdaAutorizer": {
             "Type": "AWS::ApiGateway::Authorizer",
             "Properties": {
-                "AuthorizerResultTtlInSeconds": 300,
+                "AuthorizerResultTtlInSeconds": 0,
                 "AuthorizerUri": {
                     "Fn::Join": [
                         "", [
@@ -318,7 +320,7 @@
                         ]
                     ]
                 },
-                "IdentitySource": "method.request.header.token",
+                "IdentitySource": "method.request.header.accessToken",
                 "Name": "userAuthorizer",
                 "ProviderARNs": [],
                 "RestApiId": {
@@ -327,6 +329,41 @@
                 "Type": "TOKEN"
             }
         },
+
+        "cognitoHelper": {
+            "DependsOn": "lmsCognitoClient",
+            "Type": "AWS::Lambda::Function",
+            "Properties": {
+                "Code": {
+                    "ZipFile": {
+                        "Fn::Join": ["", [
+                            "exports.handler = function(event, context) {", "\r\n",
+                            "console.log('<<<__________________cognitoHelper:',JSON.stringify(event, null, 2));", "\r\n",
+                            "let data = {", "\r\n",
+                            "ClientId: '", { "Ref": "lmsCognitoClient" }, "',", "\r\n",
+                            "UserPoolId : '", { "Ref": "lmsCognitoPool" }, "'", "\r\n",
+                            "}", "\r\n",
+                            "console.log('<<<__________________cognitoHelper:',JSON.stringify(data, null, 2));", "\r\n",
+                            "context.succeed(data);", "\r\n",
+                            "};", "\r\n"
+                        ]]
+                    }
+                },
+                "Description": "source code for cognitoHelper",
+                "FunctionName": "cognitoHelper",
+                "Handler": "index.handler",
+                "MemorySize": 128,
+                "Role": {
+                    "Fn::GetAtt": [
+                        "LambdaInvokeRole",
+                        "Arn"
+                    ]
+                },
+                "Runtime": "nodejs8.10",
+                "Timeout": 25
+            }
+        },
+
         "LambdaExecutionRole": {
             "Type": "AWS::IAM::Role",
             "Properties": {
@@ -337,7 +374,7 @@
                         "Principal": {
                             "Service": [
                                 "lambda.amazonaws.com",
-								"apigateway.amazonaws.com"
+                                "apigateway.amazonaws.com"
                             ]
                         },
                         "Action": [
@@ -357,13 +394,7 @@
                             "Action": [
                                 "dynamodb:*",
                                 "cognito-idp:*",
-                                "logs:CreateLogGroup",
-                                "logs:CreateLogStream",
-                                "logs:DescribeLogGroups",
-                                "logs:DescribeLogStreams",
-                                "logs:PutLogEvents",
-                                "logs:GetLogEvents",
-                                "logs:FilterLogEvents"
+                                "logs:*"
                             ],
                             "Resource": "*"
                         }]
@@ -371,6 +402,46 @@
                 }]
             }
         },
+
+        "LambdaInvokeRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [{
+                        "Effect": "Allow",
+                        "Principal": {
+                            "Service": [
+                                "lambda.amazonaws.com"
+                            ]
+                        },
+                        "Action": [
+                            "sts:AssumeRole"
+                        ]
+                    }]
+                },
+                "ManagedPolicyArns": [
+                    "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+                ],
+                "Policies": [{
+                    "PolicyName": "LambdaInvokePolicy",
+                    "PolicyDocument": {
+                        "Version": "2012-10-17",
+                        "Statement": [{
+                            "Effect": "Allow",
+                            "Action": [
+                                "dynamodb:*",
+                                "cognito-idp:*",
+                                "logs:*",
+                                "lambda:*"
+                            ],
+                            "Resource": "*"
+                        }]
+                    }
+                }]
+            }
+        },
+
         "lmsLambdaPermission": {
             "Type": "AWS::Lambda::Permission",
             "Properties": {
@@ -860,6 +931,17 @@
             }
         },
 
+        "lmsCognitoClient": {
+            "DependsOn": "lmsCognitoPool",
+            "Type": "AWS::Cognito::UserPoolClient",
+            "Properties": {
+                "ClientName": { "Ref": "launchName" },
+                "GenerateSecret": false,
+                "RefreshTokenValidity": 30,
+                "UserPoolId": { "Ref": "lmsCognitoPool" }
+            }
+        },
+
         "lmsCognitoUser": {
             "Type": "AWS::Cognito::UserPoolUser",
             "DependsOn": [
@@ -875,26 +957,34 @@
         }
     },
     "Outputs": {
-        "RootUrl": {
-            "Description": "Root URL of the API gateway",
+        "rootUri": {
+            "Description": "Root URL of the lesslms API gateway",
             "Value": {
-                "Fn::Join": [
-                    "", [
-                        "https://",
-                        {
-                            "Ref": "lessApi"
-                        },
-                        ".execute-api.",
-                        {
-                            "Ref": "AWS::Region"
-                        },
-                        ".amazonaws.com/",
-                        {
-                            "Ref": "lessApiStage"
-                        },
-                        "/"
-                    ]
-                ]
+                "Fn::Join": ["", [
+                    "https://",
+                    {
+                        "Ref": "lessApi"
+                    },
+                    ".execute-api.",
+                    {
+                        "Ref": "AWS::Region"
+                    },
+                    ".amazonaws.com/",
+                    {
+                        "Ref": "lessApiStage"
+                    },
+                    "/"
+                ]]
+            }
+        },
+        "cognitoPool": {
+            "Description": "Cognito Pool lesslms reference",
+            "Value": {
+                "Fn::Join": ["", ["{",
+                    "\"ClientId\":", "\"", { "Ref": "lmsCognitoClient" }, "\"", ",",
+                    "\"UserPoolId\":", "\"", { "Ref": "lmsCognitoPool" }, "\"",
+                    "}"
+                ]]
             }
         }
     },
@@ -902,10 +992,10 @@
         "launchName": {
             "Type": "String",
             "Default": "lesslms-00000000"
-        },  
+        },
         "adminEmail": {
             "Type": "String",
-            "Default": "osanzl@uoc.edu"
+            "Default": "default@uoc.edu"
         }
     }
 }
