@@ -1,0 +1,6 @@
+{
+  "name": "lesslms-frontend",
+  "short_name": "lesslms-frontend",
+  "start_url": "/",
+  "display": "standalone"
+}

@@ -1,0 +1,21 @@
+{
+  "name": "lesslms-client",
+  "version": "0.0.1",
+  "description": "Desktop client application for lesslms LMS",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "electron",
+    "serverless",
+    "node.js",
+    "lms",
+    "polymer"
+  ],
+  "author": "Oscar Sanz Llopis",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^4.1.4"
+  }
+}
