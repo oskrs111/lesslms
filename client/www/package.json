@@ -1,6 +1,7 @@
 {
   "name": "lesslms-frontend",
   "dependencies": {
+    "@polymer/iron-ajax": "^3.0.1",
     "@polymer/iron-flex-layout": "^3.0.1",
     "@polymer/iron-icons": "^3.0.1",
     "@polymer/paper-button": "^3.0.1",

@@ -16,10 +16,10 @@ class LesslmsFrontendApp extends PolymerElement {
           height: 100%;
         }
       </style>
-      <nav-view></nav-view>
       <!--
-      <login-view></login-view>
+      <nav-view></nav-view>
       -->
+      <login-view></login-view>      
     `;
     }
     static get properties() {
