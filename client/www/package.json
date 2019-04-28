@@ -1,14 +1,18 @@
 {
   "name": "lesslms-frontend",
+  "version": "0.0.1",
+  "main": "main.js",
   "dependencies": {
     "@polymer/iron-ajax": "^3.0.1",
     "@polymer/iron-flex-layout": "^3.0.1",
     "@polymer/iron-icons": "^3.0.1",
     "@polymer/paper-button": "^3.0.1",
     "@polymer/paper-card": "^3.0.1",
+    "@polymer/paper-dialog": "^3.0.1",
     "@polymer/paper-icon-button": "^3.0.2",
     "@polymer/paper-input": "^3.0.2",
     "@polymer/paper-radio-group": "^3.0.1",
+    "@polymer/paper-spinner": "^3.0.2",
     "@polymer/polymer": "^3.0.0",
     "paper-loginscreen": "^2.0.2"
   },
@@ -18,5 +22,8 @@
     "chai": "^4.2.0",
     "mocha": "^5.2.0",
     "wct-mocha": "^1.0.0"
+  },
+  "scripts": {
+    "start": "electron ."
   }
 }

@@ -1,9 +1,15 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
-import '../../node_modules/@polymer/paper-input/paper-textarea.js';
-import '../../node_modules/@polymer/paper-input/paper-input.js';
 import '../../node_modules/@polymer/paper-radio-button/paper-radio-button.js';
 import '../../node_modules/@polymer/paper-radio-group/paper-radio-group.js';
+import '../../node_modules/@polymer/paper-input/paper-textarea.js';
+import '../../node_modules/@polymer/paper-input/paper-input.js';
+
+import {
+    setData,
+    getData
+} from '../lesslms-frontend-app/lesslms-common.js';
+
 /**
  * `form-selector`
  * Form scher element
@@ -13,6 +19,10 @@ import '../../node_modules/@polymer/paper-radio-group/paper-radio-group.js';
  * @demo demo/index.html
  */
 const _formTypeMap = {
+    root: {
+        _arg1: 'email',
+        _arg2: 'profile'
+    },
     course: {
         _arg1: 'subject',
         _arg2: 'abstract'
@@ -45,7 +55,7 @@ const _formTypeMap = {
     },
     solution: {
         _arg1: 'detail'
-    },
+    }
 }
 
 class FormSelector extends PolymerElement {
@@ -73,7 +83,7 @@ class FormSelector extends PolymerElement {
         }
 
       </style>
-      <div class="wrapper">
+      <div id="wrapper_id" class="wrapper">
       <h2>Properties: [[type]]</2>
 
       <section id="solution_form_id">                              
@@ -152,6 +162,14 @@ class FormSelector extends PolymerElement {
         </div>
       </section>                
 
+      <section id="root_form_id">        
+        <div class="form-row">
+        <paper-input always-float-label label="User:" value="{{_arg1}}" readonly></paper-input>
+        </div>
+        <div class="form-row">
+        <paper-input always-float-label label="Profile:" value="{{_arg2}}" readonly></paper-input>
+        </div>        
+      </section>       
       </div>
     `;
     }
@@ -182,32 +200,106 @@ class FormSelector extends PolymerElement {
                 type: String,
                 value: ''
             },
+            _formData: {
+                type: Object,
+                value: {}
+            }
         };
 
     }
 
-    getFormData() {
-        let _data = {
-            type: this.type,
-            data: {}
-        }
-
-
-
-
-        return _data;
+    setFormData(data) {
+        console.log('setFormData(data)', data);
+        this._formData = data;
     }
 
-    _onTypeChange(val) {
+    getFormData() {
+        let _content = {};
+        switch (this.type) {
+            case 'root':
+                break;
 
-        let _forms = this.getElementsByTagName('section');
+            case 'course':
+                //OSLL: Use '_formTypeMap' to get form fields data,
+                _content[_formTypeMap[this.type]['_arg1']] = this._arg1;
+                _content[_formTypeMap[this.type]['_arg2']] = this._arg2;
+                //OSLL: Create a copy of form data
+                let _data = Object.assign({}, this._formData);
+                _data.content = _content;
+                _data.id = this._formData.sourceId;
+                _data.rid = this._formData.relatedId;
+                //OSLL: These properties are no longer need.
+                delete _data.sourceId;
+                delete _data.relatedId;
+                delete _data.cDate;
+                delete _data.mDate;
+                return _data;
+                break;
+
+            case 'definition':
+                this.$.definition_form_id.style.display = "block";
+                break;
+
+            case 'content':
+                this.$.content_form_id.style.display = "block";
+                break;
+
+            case 'topic':
+                this.$.topic_form_id.style.display = "block";
+                break;
+
+            case 'chapter':
+                this.$.chapter_form_id.style.display = "block";
+                break;
+
+            case 'evaluation':
+                this.$.evaluation_form_id.style.display = "block";
+                break;
+
+            case 'question':
+                this.$.question_form_id.style.display = "block";
+                break;
+
+            case 'solution':
+                this.$.solution_form_id.style.display = "block";
+                break;
+
+            default:
+                break;
+        }
+
+        return {};
+    }
+
+    clearFormData() {
+        this._arg1 = '';
+        this._arg2 = '';
+        this._arg3 = '';
+        this._arg4 = '';
+        this._arg5 = '';
+    }
+
+
+    _onTypeChange(val) {
+        let _forms = this.$.wrapper_id.getElementsByTagName('section');
         for (let f of _forms) {
-            f.style.display = none;
+            f.style.display = 'none';
         }
 
         switch (val) {
+            case 'root':
+                let _credentials = getData('credentials');
+                //OSLL: Use '_formTypeMap' to set form fields
+                this._arg1 = _credentials[_formTypeMap[val]['_arg1']];
+                this._arg2 = _credentials[_formTypeMap[val]['_arg2']];
+                this.$.root_form_id.style.display = 'block';
+                break;
+
             case 'course':
-                this.$.course_form_id.style.display = "block";
+                let _content = JSON.parse(this._formData.content);
+                this._arg1 = _content[_formTypeMap[val]['_arg1']];
+                this._arg2 = _content[_formTypeMap[val]['_arg2']];
+                this.$.course_form_id.style.display = 'block';
                 break;
 
             case 'definition':

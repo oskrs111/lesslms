@@ -1,7 +1,12 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
 import '../../node_modules/paper-loginscreen/paper-loginscreen.js';
 import '../../node_modules/@polymer/iron-ajax/iron-ajax.js';
-import { getRootUri } from '../lesslms-frontend-app/lesslms-common.js';
+import {
+    getRootUri,
+    setData,
+    getData
+} from '../lesslms-frontend-app/lesslms-common.js';
+
 /**
  * `login-view`
  * Simple view to perform Login process
@@ -69,8 +74,9 @@ class LoginView extends PolymerElement {
         this.$.ajax_id.generateRequest();
     }
 
-    _handleResponse(response) {
-        console.log("_handleResponse", response);
+    _handleResponse(e) {
+        setData('credentials', e.detail.response);
+        this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
     }
 
 }

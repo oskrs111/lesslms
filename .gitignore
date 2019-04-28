@@ -10,6 +10,8 @@ yarn-error.log*
 #lesslms deployment
 release/aws/formation/*
 release/aws/lambda/*
+client/www/build
+client/www/chrome
 
 # Runtime data
 pids
