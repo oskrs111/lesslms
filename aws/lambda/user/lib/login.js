@@ -1,7 +1,7 @@
 /**
  * @file lesslms, serverless LMS application.
  * @author Oscar Sanz Llopis <osanzl@uoc.edu>
- * @module userLambda/login
+ * @module userLambda/liblogin
  * @license MIT
  */
 let AWS = require("aws-sdk");
