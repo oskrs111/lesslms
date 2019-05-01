@@ -8,7 +8,6 @@ import '../form-selector/form-selector.js';
 import '../nav-card/nav-card.js';
 import {
     getRootUri,
-    setData,
     getData,
     getId
 } from '../lesslms-frontend-app/lesslms-common.js';
@@ -28,21 +27,19 @@ const _addTypeMap = {
     definition: [],
     content: [{ type: 'topic', max: -1 }, { type: 'evaluation', max: 1 }],
     topic: [{ type: 'chapter', max: -1 }, { type: 'evaluation', max: 1 }],
-    chapter: [{ type: 'chapter', max: -1 }, { type: 'evaluation', max: 1 }],
-    evaluation: [{ type: 'definition', max: 1 }, { type: 'question', max: -1 }],
+    chapter: [{ type: 'evaluation', max: 1 }],
+    evaluation: [{ type: 'question', max: -1 }],
     question: [{ type: 'solution', max: 1 }],
     solution: []
-}
+};
 
 class NavView extends PolymerElement {
     ready() {
         super.ready();
         document.addEventListener('add', (e) => { this._onAdd(e) });
         document.addEventListener('edit', (e) => { this._onEdit(e) });
-
-        this.observers = [
-            '_onPathChange(path.*)'
-        ];
+        this._reload = false;
+        this._location = [];
     }
     static get template() {
         return html `
@@ -58,19 +55,20 @@ class NavView extends PolymerElement {
         }
 
         .wrapper {
-          margin: 25px auto;
-          padding: 15px;
-          width: 90%;
-          height: 90vh;
-          background-color: white;
-          border-radius: 5px;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+          margin: 0 auto;
+          padding: 7px;
+          width: 100%;
+          width: calc(100% - 32px);
+          height: calc(100vh - 32px);          
+        }
+
+        .wrapper * {
+            background-color: white;    
         }
 
         .wrapper header{
           height: 64px;          
-          border: 1px transparent;          
-          border-radius: 5px;
+          border: 1px transparent;                    
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
@@ -92,15 +90,15 @@ class NavView extends PolymerElement {
         }
 
         paper-button {
-          background-color: var(--paper-blue-700);
+          background-color: var(--paper-blue-700) !important;
+          text-align: center;
           color: white;
         }
 
         section {
           margin: 10px 0 0 0;
           height: calc(100% - 74px);          
-          border: 1px transparent;          
-          border-radius: 5px;
+          border: 1px transparent;                    
           box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
         }
 
@@ -116,9 +114,9 @@ class NavView extends PolymerElement {
           overflow: scroll; 
         }
 
-        nav-card {
-          width: 250px;
+        nav-card {          
           margin: 7px;
+          width: 100%;
         }
 
         .header-buttons {
@@ -137,18 +135,19 @@ class NavView extends PolymerElement {
             [[_path]]
             </div>            
           </div>
+          <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
           <paper-button class="header-buttons" on-click="_onSave">SAVE</paper-button>
+          <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>
         </header>
         <section class="layout horizontal center-center">
           <form-selector id="form_id" type="[[type]]"></form-selector>
-          <div class="card layout horizontal wrap">
-            <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
-            <h3>Number of elements: [[_cardCount]]</3>
+          <div class="card layout vertical">            
+            <p>Number of elements: [[_cardCount]]</p>
             <dom-repeat items="[[_cardData]]" filter="_dataFilter">
             <template>
               <nav-card 
                 type="[[item.type]]",
-                abstract="[[item.abstract]]", 
+                title="[[item.title]]", 
                 id="[[item.id]]"></nav-card>
             </template>
             </dom-repeat>
@@ -200,21 +199,22 @@ class NavView extends PolymerElement {
                 type: Object,
                 value: {}
             },
+            _currentId: {
+                type: String,
+                value: '',
+                observer: '_onIdChange'
+            },
             _cardCount: {
                 type: Number,
                 value: 0,
                 observer: '_onCountChange'
-            },
-            _location: {
-                type: Object,
-                value: { current: '', previous: '', }
             }
         };
     }
 
     initialLoad() {
         let _credentials = getData('credentials');
-        this._updateLocation(_credentials.email);
+        this._updateLocation(_credentials.email, _credentials.email);
         this._updatePath('push', _credentials.email);
         this._fetchData({ id: _credentials.email });
     }
@@ -225,6 +225,10 @@ class NavView extends PolymerElement {
         } else {
             this.updateStyles({ '--header-buttons-display': 'block' })
         }
+    }
+
+    _onIdChange(val) {
+        console.log('_onIdChange(val)', val);
     }
 
     _onPathChange(val) {
@@ -239,6 +243,7 @@ class NavView extends PolymerElement {
 
             case 'pop':
                 this.path.pop();
+                this.path.pop();
                 break;
         }
 
@@ -251,12 +256,21 @@ class NavView extends PolymerElement {
     }
 
     _updateLocation(current) {
-        this._location.previous = this._location.current;
-        this._location.current = current;
-        console.log('_updateLocation(current)', current, this._location);
+        if (this._location[this._location.length - 1] != current) {
+            this._location.push(new String(current));
+        }
+        console.log('_______________________updateLocation(current)', current, this._location);
+    }
+
+    _getPreviousLocation() {
+        this._location.pop();
+        let _r = this._location[this._location.length - 1];
+        console.log('________________________getPreviousLocation(<< _r)', _r);
+        return _r;
     }
 
     _fetchData(params) {
+        console.log('_fetchData(params)', params);
         let _credentials = getData('credentials');
         this.$.ajax_id.url = getRootUri() + 'lms/fetch';
         this.$.ajax_id.method = 'GET';
@@ -269,22 +283,63 @@ class NavView extends PolymerElement {
         this._cardData = [];
         this._addData = [];
         this.$.ajax_id.generateRequest();
+        this.$.spinner_id.active = true;
+    }
+
+    _addCourse(name) {
+        console.log('_addCourse(name)', name);
+        let _credentials = getData('credentials');
+        this.$.ajax_id.url = getRootUri() + 'lms/add';
+        this.$.ajax_id.method = 'POST';
+        this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
+        this.$.ajax_id.body = JSON.stringify({
+            name: name,
+            user: _credentials.email,
+            profile: _credentials.profile,
+            id: getId('course')
+        });
+        this.$.ajax_id.generateRequest();
+        this.$.spinner_id.active = true;
     }
 
     _saveData(data) {
         console.log('_saveData(data)', data);
         let _credentials = getData('credentials');
-        this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
         this.$.ajax_id.url = getRootUri() + 'lms/update';
         this.$.ajax_id.method = 'POST';
+        this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
         this.$.ajax_id.body = JSON.stringify(data);
         this.$.ajax_id.params = {};
         this.$.ajax_id.generateRequest();
+        this.$.spinner_id.active = true;
+    }
+
+    _handleResponse(e) {
+        console.log('_handleResponse(response)', e.detail.response);
+        this.$.spinner_id.active = false;
+        switch (e.detail.response.path) {
+            case '/lms/fetch':
+                this._currentData = e.detail.response;
+                this._cardData = this._getCardData(this._currentData.response.Items, this._currentData.response.resolved);
+                break;
+
+            case '/lms/update':
+                this._onReload();
+                //alert('Data saved successfully!');
+                break;
+
+            case '/lms/add':
+                //OSLL: Fetch new data for current user.
+                this.initialLoad();
+                break;
+
+            default:
+                break;
+        }
     }
 
     _onCountChange(val) {
-        if (val > 0) this.$.spinner_id.active = false;
-        else this.$.spinner_id.active = true;
+
     }
 
     _onAdd(e) {
@@ -292,23 +347,43 @@ class NavView extends PolymerElement {
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
         switch (e.detail.type) {
             case 'course':
-                this.$.ajax_id.url = getRootUri() + 'lms/add';
-                this.$.ajax_id.method = 'POST';
-                this.$.ajax_id.body = JSON.stringify({
-                    user: _credentials.email,
-                    name: e.detail.name,
-                    profile: _credentials.profile,
-                    id: getId(e.detail.type)
-                });
-                this.$.ajax_id.generateRequest();
+                this._addCourse(e.detail.name);
+                /*
+                    this.$.ajax_id.url = getRootUri() + 'lms/add';
+                    this.$.ajax_id.method = 'POST';
+                    this.$.ajax_id.body = JSON.stringify({
+                        user: _credentials.email,
+                        name: e.detail.name,
+                        profile: _credentials.profile,
+                        id: getId(e.detail.type)
+                    });
+                    this.$.ajax_id.generateRequest();
+                    this.$.spinner_id.active = true;
+                    */
                 break;
 
             default:
-                //OSLL: Aquí la resta d'elements.
-                console.log('NavView::_onAdd(event)', e);
+                //OSLL: All other elements are added in the same way ;-)
+                //      To add content just 'update' a new element.
+                let _data = {
+                    id: this._currentId,
+                    rid: getId(e.detail.type),
+                    type: this._getStoreType(e.detail.type),
+                    content: {}
+                }
+                this._saveData(_data);
                 break;
         }
     }
+
+    _onPublish(e) {
+
+    }
+
+    _onDelete(e) {
+
+    }
+
 
     _onEdit(e) {
         this._fetchData({ id: e.detail.id });
@@ -319,37 +394,19 @@ class NavView extends PolymerElement {
     }
 
     _onBack(e) {
-        this._fetchData({ id: this._location.previous });
+        this._fetchData({ id: this._getPreviousLocation() });
         this._updatePath('pop');
     }
 
-    _dataFilter(item) {
-        //OSLL: Use this filter function on <dom-repeat> just to count number of received items.
-        console.log('_dataFilter(item)', item);
-        this._cardCount++;
-        return true;
+    _onReload(e) {
+        this._reload = true;
+        this._fetchData({ id: this._currentId });
     }
 
-    _handleResponse(e) {
-        console.log('_handleResponse(response)', e.detail.response);
-        switch (e.detail.response.path) {
-            case '/lms/fetch':
-                this._currentData = e.detail.response;
-                this._cardData = this._getCardData(this._currentData.response.Items, this._currentData.response.resolved);
-                break;
-
-            case '/lms/update':
-                alert('Data saved successfully!');
-                break;
-
-            case '/lms/add':
-                //OSLL: Reload view to get the last added course on list.
-                this._onTypeChange('root');
-                break;
-
-            default:
-                break;
-        }
+    _dataFilter(item) {
+        //OSLL: Use this filter function on <dom-repeat> just to count number of received items.        
+        this._cardCount++;
+        return true;
     }
 
     _getCardData(items, resolved) {
@@ -360,37 +417,20 @@ class NavView extends PolymerElement {
         }
         switch (resolved) {
             case 'users':
-                this._updateLocation(items[0].userId);
-                for (let i of items) {
-                    let _card = Object.assign({}, _template);
-                    let _attributes = JSON.parse(i.attributes);
-                    this.type = 'root';
-                    this._addData = Array.from(_addTypeMap[this.type]);
-                    _card.type = 'course';
-                    _card.abstract = _attributes.name;
-                    _card.id = i.sourceId;
-                    _r.push(_card);
-                }
-                break;
+                this.type = 'root';
+                this._addData = Array.from(_addTypeMap[this.type]);
+                if (items.length > 0) {
+                    if (this._reload == false) {
+                        this._updateLocation(items[0].userId);
+                        this._currentId = items[0].userId;
+                    }
+                    this._reload = false;
 
-            case 'courses':
-                for (let i of items) {
-                    if (i.sourceId == i.relatedId) {
-                        //OSLL: Form data corresponds to this item that shoul not be shown on content list.
-                        //      By updating this.type, form and new options will automatically update on view.
-
-                        //OSLL: Pass data to form before switch the view.
-                        this.$.form_id.setFormData(i);
-                        this.type = this._getLocalType(i.type);
-                        this._addData = Array.from(_addTypeMap[this.type]);
-
-                        //OSLL: Update navigation references  
-                        this._updatePath('push', this.type);
-                        this._updateLocation(i.sourceId);
-                    } else {
+                    for (let i of items) {
                         let _card = Object.assign({}, _template);
-                        _card.type = _getLocalType(i.type);
-                        _card.abstract = i.abstract;
+                        let _attributes = JSON.parse(i.attributes);
+                        _card.type = 'course';
+                        _card.title = `COURSE: ${_attributes.name}`;
                         _card.id = i.sourceId;
                         _r.push(_card);
                     }
@@ -398,6 +438,61 @@ class NavView extends PolymerElement {
                 break;
 
             default:
+            case 'courses':
+                let _addData_ = [];
+                let _addDataCount = [];
+                for (let i of items) {
+                    if (i.sourceId == i.relatedId) {
+                        //OSLL: Form data corresponds to this item that shoul not be shown on content list.
+                        //      By updating this.type, form and new options will automatically update on view.                        
+                        //OSLL: Pass data to form before switch the view.
+                        this.$.form_id.setFormData(i);
+                        this.type = this._getLocalType(i.type);
+                        _addData_ = Array.from(_addTypeMap[this.type]);
+
+                        //OSLL: Update navigation references  
+                        if (this._reload == false) {
+                            this._updatePath('push', this.type);
+                            this._updateLocation(i.sourceId);
+                            this._currentId = i.sourceId;
+                        }
+                        this._reload = false;
+
+                    } else {
+                        let _type = this._getLocalType(i.type);
+                        if (_addDataCount[_type] == undefined) {
+                            _addDataCount[_type] = { type: _type, count: 1 };
+                        } else {
+                            _addDataCount[_type].count++;
+                        }
+
+                        let _card = Object.assign({}, _template);
+                        _card.type = this._getLocalType(i.type);
+                        _card.title = i.type;
+                        _card.id = i.relatedId;
+                        _r.push(_card);
+                    }
+                }
+                //OSLL: Iterate over '_addData_copy' and remove the 'add cards' according to its 'max' property.
+                //OSLL: Here is need to use a copy because 'splice' will modify source array and alter the iteration range...
+                let _addData_copy = Array.from(_addData_);
+                for (let t of _addData_copy) {
+                    if (t.max < 0) continue;
+                    else if (_addDataCount[t.type] == undefined) continue;
+                    else if (_addDataCount[t.type].count >= t.max) {
+                        //OSLL: Max number of elements of this type is reached. Remove current entry.
+                        let _idx = 0;
+                        for (let x of _addData_) {
+                            if (x.type == t.type) {
+                                _addData_.splice(_idx, 1);
+                                break;
+                            }
+                            _idx++;
+                        }
+                    }
+                }
+                //OSLL: Here is need to use a copy in order to trigger data change in binding single time.
+                this._addData = _addData_;
                 break;
         }
         return _r;
@@ -405,9 +500,14 @@ class NavView extends PolymerElement {
 
     _getLocalType(dbType) {
         let _r = dbType.toLowerCase().substring(1, dbType.length);
-        console.log('_getLocalType(dbType)', dbType, _r);
         return _r;
     }
+
+    _getStoreType(dbType) {
+        let _r = 't' + dbType.toUpperCase();
+        return _r;
+    }
+
 
 } //class
 
