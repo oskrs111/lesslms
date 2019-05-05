@@ -1,5 +1,9 @@
-export function getRootUri() {
-    return 'https://i2gq4kgoz2.execute-api.eu-west-1.amazonaws.com/less/'
+export function setData_L(type, data) {
+    localStorage.setItem(`lesslms-${type}`, JSON.stringify(data));
+}
+
+export function getData_L(type) {
+    return JSON.parse(localStorage.getItem(`lesslms-${type}`));
 }
 
 export function setData(type, data) {

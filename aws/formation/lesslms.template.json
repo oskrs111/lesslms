@@ -594,13 +594,7 @@
                         "Statement": [{
                             "Effect": "Allow",
                             "Action": [
-                                "logs:CreateLogGroup",
-                                "logs:CreateLogStream",
-                                "logs:DescribeLogGroups",
-                                "logs:DescribeLogStreams",
-                                "logs:PutLogEvents",
-                                "logs:GetLogEvents",
-                                "logs:FilterLogEvents"
+                                "logs:*"
                             ],
                             "Resource": "*"
                         }]
@@ -920,6 +914,7 @@
         },
 
         "lmsCognitoPool": {
+            "DependsOn": "lessApiStage",
             "Type": "AWS::Cognito::UserPool",
             "Properties": {
                 "AutoVerifiedAttributes": ["email"],
@@ -927,7 +922,16 @@
                 "EmailVerificationSubject": "lesslms verification request",
                 "MfaConfiguration": "OFF",
                 "UsernameAttributes": ["email"],
-                "UserPoolName": { "Ref": "launchName" }
+                "UserPoolName": { "Ref": "launchName" },
+                "Policies": {
+                    "PasswordPolicy": {
+                        "MinimumLength": 6,
+                        "RequireLowercase": true,
+                        "RequireNumbers": false,
+                        "RequireSymbols": false,
+                        "RequireUppercase": false
+                    }
+                }
             }
         },
 
@@ -950,7 +954,30 @@
             "Properties": {
                 "DesiredDeliveryMediums": ["EMAIL"],
                 "ForceAliasCreation": false,
-                "UserAttributes": [{ "Name": "profile", "Value": "administrator" }],
+                "UserAttributes": [
+                    { "Name": "profile", "Value": "administrator" },
+                    { "Name": "zoneinfo", "Value": { "Ref": "launchRegion" } },
+                    {
+                        "Name": "website",
+                        "Value": {
+                            "Fn::Join": ["", [
+                                "https://",
+                                {
+                                    "Ref": "lessApi"
+                                },
+                                ".execute-api.",
+                                {
+                                    "Ref": "AWS::Region"
+                                },
+                                ".amazonaws.com/",
+                                {
+                                    "Ref": "lessApiStage"
+                                },
+                                "/"
+                            ]]
+                        }
+                    }
+                ],
                 "Username": { "Ref": "adminEmail" },
                 "UserPoolId": { "Ref": "lmsCognitoPool" }
             }
@@ -993,6 +1020,10 @@
             "Type": "String",
             "Default": "lesslms-00000000"
         },
+		"launchRegion": {
+            "Type": "String",
+            "Default": "eu-central-1"
+        },					
         "adminEmail": {
             "Type": "String",
             "Default": "default@uoc.edu"

@@ -92,7 +92,7 @@ class FormSelector extends PolymerElement {
 
         paper-input, paper-textarea {                        
             --paper-input-container-underline-focus: {
-                border-color: var(--paper-blue-500);              
+                border-color: var(--paper-blue-1000);              
             }
     }
         
@@ -125,7 +125,7 @@ class FormSelector extends PolymerElement {
                 </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">
-                <paper-textarea class="text" label="Course abstract:" value="{{_arg2}}" rows="10" char-counter="true" maxlength="250" placeholder="Write course abstract here..."></paper-textarea>
+                <paper-textarea class="text" label="Course abstract:" value="{{_arg2}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write course abstract here..."></paper-textarea>
             </template>
         </div>
       </section>     
@@ -179,7 +179,7 @@ class FormSelector extends PolymerElement {
                 </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">        
-                <paper-textarea class="text" label="Course abstract:" value="{{_arg1}}" rows="10" char-counter="true" maxlength="250" placeholder="Write evaluation abstract here..."></paper-textarea>        
+                <paper-textarea class="text" label="Course abstract:" value="{{_arg1}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write evaluation abstract here..."></paper-textarea>        
             </template>
         </div>                
       </section>   
@@ -210,7 +210,7 @@ class FormSelector extends PolymerElement {
                 </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">        
-                <paper-textarea class="text" label="Question statement:" value="{{_arg4}}" rows="10" char-counter="true" maxlength="500" placeholder="Write question statement here..."></paper-textarea>        
+                <paper-textarea class="text" label="Question statement:" value="{{_arg4}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write question statement here..."></paper-textarea>        
             </template>
         </div>                        
       </section>       
@@ -229,7 +229,7 @@ class FormSelector extends PolymerElement {
                 </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">        
-                <paper-textarea class="text" label="Solution body:" value="{{_arg1}}" rows="10" char-counter="true" maxlength="500" placeholder="Write solution body here..."></paper-textarea>        
+                <paper-textarea class="text" label="Solution body:" value="{{_arg1}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write solution body here..."></paper-textarea>        
             </template>
         </div>                        
       </section>       
@@ -249,7 +249,7 @@ class FormSelector extends PolymerElement {
             </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">
-            <paper-textarea class="text" label="Chapter content:" value="{{_arg2}}" rows="15" char-counter="true" maxlength="5000" placeholder="Write chapter content..."></paper-textarea>        
+            <paper-textarea class="text" label="Chapter content:" value="{{_arg2}}" rows="15" char-counter="true" maxlength="15000" placeholder="Write chapter content..."></paper-textarea>        
             </template>
         </div>                
       </section>  

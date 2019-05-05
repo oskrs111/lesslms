@@ -1,0 +1,63 @@
+{
+  "_from": "paper-loginscreen@^2.0.2",
+  "_id": "paper-loginscreen@2.0.2",
+  "_inBundle": false,
+  "_integrity": "sha512-XN/LgNDjkNUI5oZ1quU1CLUWH0jnRcNoWtb+n9sQdGeGm1IvnR+XKAP3RCmA/0qiKlJ7/IVqE43pn1aIO88y5g==",
+  "_location": "/paper-loginscreen",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "range",
+    "registry": true,
+    "raw": "paper-loginscreen@^2.0.2",
+    "name": "paper-loginscreen",
+    "escapedName": "paper-loginscreen",
+    "rawSpec": "^2.0.2",
+    "saveSpec": null,
+    "fetchSpec": "^2.0.2"
+  },
+  "_requiredBy": [
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/paper-loginscreen/-/paper-loginscreen-2.0.2.tgz",
+  "_shasum": "8f41e7cae07baa2017c0fd13ac238f874ce7a172",
+  "_spec": "paper-loginscreen@^2.0.2",
+  "_where": "D:\\GitHub\\lesslms\\client\\www",
+  "authors": [
+    "cforgeard"
+  ],
+  "bugs": {
+    "url": "https://github.com/cforgeard/paper-loginscreen/issues"
+  },
+  "bundleDependencies": false,
+  "dependencies": {
+    "@polymer/paper-button": "^3.0.0-pre.19",
+    "@polymer/paper-input": "^3.0.0-pre.19",
+    "@polymer/paper-progress": "^3.0.0-pre.19",
+    "@polymer/paper-styles": "^3.0.0-pre.19",
+    "@polymer/polymer": "^3.0.0"
+  },
+  "deprecated": false,
+  "description": "Material login screen, built using Polymer 3",
+  "devDependencies": {
+    "@polymer/iron-demo-helpers": "^3.0.0-pre.19",
+    "@webcomponents/webcomponentsjs": "^2.0.0",
+    "wct-browser-legacy": "^1.0.0"
+  },
+  "homepage": "https://github.com/cforgeard/paper-loginscreen#readme",
+  "keywords": [
+    "web-components",
+    "polymer",
+    "login",
+    "screen",
+    "account",
+    "polymer 3"
+  ],
+  "license": "MIT",
+  "main": "paper-loginscreen.js",
+  "name": "paper-loginscreen",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cforgeard/paper-loginscreen.git"
+  },
+  "version": "2.0.2"
+}

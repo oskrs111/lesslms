@@ -1,5 +1,5 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
-import { getData, getRootUri } from '../lesslms-frontend-app/lesslms-common.js';
+import { getData, getData_L } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
 import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
@@ -147,7 +147,7 @@ class NavCard extends PolymerElement {
 
         this.abstract = 'Loading...';
         let _credentials = getData('credentials');
-        this.$.ajax_id.url = getRootUri() + 'lms/get';
+        this.$.ajax_id.url = getData_L('uri') + 'lms/get';
         this.$.ajax_id.method = 'GET';
         this.$.ajax_id.body = {};
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;

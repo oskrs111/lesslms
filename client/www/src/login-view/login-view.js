@@ -1,12 +1,8 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
+import { getData_L, setData, getData } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
-import '../../node_modules/paper-loginscreen/paper-loginscreen.js';
 import '../../node_modules/@polymer/iron-ajax/iron-ajax.js';
-import {
-    getRootUri,
-    setData,
-    getData
-} from '../lesslms-frontend-app/lesslms-common.js';
+import '../paper-loginscreen-ext/paper-loginscreen-ext.js';
 
 /**
  * `login-view`
@@ -41,12 +37,6 @@ class LoginView extends PolymerElement {
           align-self: flex-start;
         }
 
-        #spinner_id {
-          position: relative;
-          top: 25px;
-          left: -50px;
-        }
-
         paper-loginscreen {
           --login-btn-raised-background-color: var(--paper-blue-700);
           --login-btn-background-color: var(--paper-blue-700);
@@ -57,8 +47,7 @@ class LoginView extends PolymerElement {
 
       </style>
       <div class="flex-wrap">        
-        <paper-loginscreen title="lesslms" subtitle="Login" username="{{username}}" password="{{password}}"></paper-loginscreen>
-        <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
+        <paper-loginscreen title="lesslms" subtitle="Login" username="{{username}}" password="{{password}}"></paper-loginscreen>        
       </div>      
       <iron-ajax id="ajax_id"
       method="GET"  
@@ -81,7 +70,7 @@ class LoginView extends PolymerElement {
             },
             _uri: {
                 type: String,
-                value: function() { return getRootUri() + 'user/login' },
+                value: function() { return getData_L('uri') + 'user/login' },
             },
         };
     }
@@ -89,12 +78,10 @@ class LoginView extends PolymerElement {
     _onLogin() {
         this.$.ajax_id.params = { user: this.username, pass: this.password };
         this.$.ajax_id.generateRequest();
-        this.$.spinner_id.active = true;
     }
 
     _handleResponse(e) {
         setData('credentials', e.detail.response);
-        this.$.spinner_id.active = false;
         this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
     }
 

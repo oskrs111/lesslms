@@ -1,4 +1,5 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
+import { getData_L, getData, getId } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
 import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
@@ -6,11 +7,7 @@ import '../../node_modules/@polymer/paper-button/paper-button.js';
 import '../../node_modules/@polymer/iron-icons/iron-icons.js';
 import '../form-selector/form-selector.js';
 import '../nav-card/nav-card.js';
-import {
-    getRootUri,
-    getData,
-    getId
-} from '../lesslms-frontend-app/lesslms-common.js';
+
 /**
  * `nav-view`
  * View to display lesslms contents
@@ -135,9 +132,9 @@ class NavView extends PolymerElement {
             [[_path]]
             </div>            
           </div>
-          <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
           <paper-button class="header-buttons" on-click="_onSave">SAVE</paper-button>
           <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>
+          <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
         </header>
         <section class="layout horizontal center-center">
           <form-selector id="form_id" type="[[type]]"></form-selector>
@@ -272,7 +269,7 @@ class NavView extends PolymerElement {
     _fetchData(params) {
         console.log('_fetchData(params)', params);
         let _credentials = getData('credentials');
-        this.$.ajax_id.url = getRootUri() + 'lms/fetch';
+        this.$.ajax_id.url = getData_L('uri') + 'lms/fetch';
         this.$.ajax_id.method = 'GET';
         this.$.ajax_id.body = {};
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
@@ -289,7 +286,7 @@ class NavView extends PolymerElement {
     _addCourse(name) {
         console.log('_addCourse(name)', name);
         let _credentials = getData('credentials');
-        this.$.ajax_id.url = getRootUri() + 'lms/add';
+        this.$.ajax_id.url = getData_L('uri') + 'lms/add';
         this.$.ajax_id.method = 'POST';
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
         this.$.ajax_id.body = JSON.stringify({
@@ -305,7 +302,7 @@ class NavView extends PolymerElement {
     _saveData(data) {
         console.log('_saveData(data)', data);
         let _credentials = getData('credentials');
-        this.$.ajax_id.url = getRootUri() + 'lms/update';
+        this.$.ajax_id.url = getData_L('uri') + 'lms/update';
         this.$.ajax_id.method = 'POST';
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
         this.$.ajax_id.body = JSON.stringify(data);
@@ -348,18 +345,6 @@ class NavView extends PolymerElement {
         switch (e.detail.type) {
             case 'course':
                 this._addCourse(e.detail.name);
-                /*
-                    this.$.ajax_id.url = getRootUri() + 'lms/add';
-                    this.$.ajax_id.method = 'POST';
-                    this.$.ajax_id.body = JSON.stringify({
-                        user: _credentials.email,
-                        name: e.detail.name,
-                        profile: _credentials.profile,
-                        id: getId(e.detail.type)
-                    });
-                    this.$.ajax_id.generateRequest();
-                    this.$.spinner_id.active = true;
-                    */
                 break;
 
             default:
