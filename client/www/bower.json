@@ -1,0 +1,25 @@
+{
+  "name": "lesslms-frontend",
+  "description": "",
+  "main": "index.js",
+  "authors": [
+    "Oscar Sanz Llopis <oskrs111@gmail.com>"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "serverless",
+    "polymer",
+    "aws"
+  ],
+  "homepage": "https://github.com/oskrs111/lesslms",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "paper-tree": "^1.0.3"
+  }
+}

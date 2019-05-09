@@ -2,7 +2,7 @@ import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polyme
 import { getData, getData_L } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
-import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
+import '../../node_modules/@polymer/paper-progress/paper-progress.js'
 import '../../node_modules/@polymer/paper-dialog/paper-dialog.js';
 import '../../node_modules/@polymer/paper-button/paper-button.js';
 import '../../node_modules/@polymer/paper-input/paper-input.js';
@@ -69,8 +69,14 @@ class NavCard extends PolymerElement {
           border-top: 1px solid var(--paper-blue-500);
           @apply --layout-end-justified;
         }
+
+        paper-progress {
+            width: 100%;
+            --paper-progress-active-color: var(--paper-blue-700);
+        }
         
       </style>
+      <paper-progress disabled="[[!_loading]]" indeterminate></paper-progress>
       <paper-card heading="[[title]]" image="[[_image]]">
       <template is="dom-if" if="[[!add]]">              
       <div class="detail-content">      
@@ -81,8 +87,7 @@ class NavCard extends PolymerElement {
         <p>[[abstract]]</p>        
         </div>
       </template>
-      <div class="layout horizontal card-toolbar">                
-        <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
+      <div class="layout horizontal card-toolbar">                        
         <paper-icon-button id="add_id" icon="add-circle"  on-click="_onAdd"></paper-icon-button>
         <paper-icon-button id="reload_id" icon="refresh"  on-click="_onReload"></paper-icon-button>
         <paper-icon-button id="edit_id" icon="create"     on-click="_onEdit"></paper-icon-button>
@@ -137,6 +142,10 @@ class NavCard extends PolymerElement {
                 value: false,
                 observer: '_onAddChange'
             },
+            _loading: {
+                type: Boolean,
+                value: false
+            }
         };
     }
 
@@ -158,12 +167,12 @@ class NavCard extends PolymerElement {
         this._cardData = [];
         this._addData = [];
         this.$.ajax_id.generateRequest();
-        this.$.spinner_id.active = true;
+        this._loading = true;
     }
 
     _handleResponse(e) {
         //console.log('_handleResponse(response)', e.detail.response);
-        this.$.spinner_id.active = false;
+        this._loading = false;
         switch (e.detail.response.path) {
             case '/lms/get':
                 this._cardData = this._updateContent(e.detail.response.response.Item);

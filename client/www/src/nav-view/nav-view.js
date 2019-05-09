@@ -2,11 +2,15 @@ import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polyme
 import { getData_L, getData, getId } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
-import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
+import '../../node_modules/@polymer/paper-progress/paper-progress.js'
 import '../../node_modules/@polymer/paper-button/paper-button.js';
 import '../../node_modules/@polymer/iron-icons/iron-icons.js';
 import '../form-selector/form-selector.js';
+import '../course-loader/course-loader.js';
+import '../paper-tree/paper-tree.js';
 import '../nav-card/nav-card.js';
+
+//https://www.webcomponents.org/element/@polymer/iron-icons/demo/demo/index.html
 
 /**
  * `nav-view`
@@ -35,11 +39,15 @@ class NavView extends PolymerElement {
         super.ready();
         document.addEventListener('add', (e) => { this._onAdd(e) });
         document.addEventListener('edit', (e) => { this._onEdit(e) });
+        document.addEventListener('select', (e) => { this._onSelect(e) });
+        document.addEventListener('load-end', (e) => { this._onLoadEnd(e) });
+        document.addEventListener('load-updated', (e) => { this._onLoadEnd(e) });
         this._reload = false;
         this._location = [];
     }
+
     static get template() {
-        return html `
+        return html `    
       <style is="custom-style" include="iron-flex iron-flex-alignment"></style>  
       <style>
         :host {
@@ -100,12 +108,19 @@ class NavView extends PolymerElement {
         }
 
         form-selector {
-          width: 70%;
+          width: 60%;
           height: 100%;
         }
 
-        div.card{
-          width: 30%;
+        div.left{
+            width: 20%;
+            height: calc(100% - 14px);     
+            padding: 7px;    
+            overflow: scroll; 
+        }
+        
+        div.rigth{
+          width: 20%;
           height: calc(100% - 14px);     
           padding: 7px;    
           overflow: scroll; 
@@ -120,25 +135,33 @@ class NavView extends PolymerElement {
           display: var(--header-buttons-display);
         }
 
+        paper-progress {
+            width: 100%;
+            --paper-progress-active-color: var(--paper-blue-700);
+        }
+
       </style>
       <div class="wrapper">
+      <paper-progress disabled="[[!_loading]]" indeterminate></paper-progress>
         <header class="layout horizontal center-center">
           <paper-icon-button icon="arrow-back" class="header-buttons" on-click="_onBack"></paper-icon-button>
           <div class="container">
             <div class="top">
-            <h3>[[type]]</h3>
+                <h3>[[type]]</h3>
             </div>
-            <div class="bot">
-            [[_path]]
-            </div>            
+                <div class="bot">[[_path]]</div>            
           </div>
           <paper-button class="header-buttons" on-click="_onSave">SAVE</paper-button>
-          <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>
-          <paper-spinner-lite id="spinner_id"></paper-spinner-lite>
-        </header>
-        <section class="layout horizontal center-center">
-          <form-selector id="form_id" type="[[type]]"></form-selector>
-          <div class="card layout vertical">            
+          <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>                    
+        </header>        
+        <section class="layout horizontal center-center">       
+        <div class="left layout vertical">  
+          <paper-progress id="progressL_id" disabled="[[!_loading]]" ></paper-progress>             
+          <paper-tree data="[[_treeData]]">
+         </paper-tree>         
+         </div>
+         <form-selector id="form_id" type="[[type]]"></form-selector>
+          <div class="rigth layout vertical">            
             <p>Number of elements: [[_cardCount]]</p>
             <dom-repeat items="[[_cardData]]" filter="_dataFilter">
             <template>
@@ -155,10 +178,10 @@ class NavView extends PolymerElement {
                 add></nav-card>            
             </template>
             </dom-repeat>
-
           </div>
         </section>
       </div>
+      <course-loader id="loader_id" progress="{{_progress}}"></course-loader>
       <iron-ajax id="ajax_id"
       method=""  
       url=""      
@@ -169,6 +192,7 @@ class NavView extends PolymerElement {
       </iron-ajax>
     `;
     }
+
     static get properties() {
         return {
             type: {
@@ -203,8 +227,22 @@ class NavView extends PolymerElement {
             },
             _cardCount: {
                 type: Number,
+                value: 0
+            },
+            _progress: {
+                type: Number,
                 value: 0,
-                observer: '_onCountChange'
+                observer: '_onProgressChange'
+            },
+            _loading: {
+                type: Boolean,
+                value: true
+            },
+            _treeData: {
+                type: Object,
+                value: function() {
+                    return null;
+                }
             }
         };
     }
@@ -213,7 +251,7 @@ class NavView extends PolymerElement {
         let _credentials = getData('credentials');
         this._updateLocation(_credentials.email, _credentials.email);
         this._updatePath('push', _credentials.email);
-        this._fetchData({ id: _credentials.email });
+        this.$.loader_id._fetchData({ id: _credentials.email });
     }
 
     _onTypeChange(val) {
@@ -280,7 +318,7 @@ class NavView extends PolymerElement {
         this._cardData = [];
         this._addData = [];
         this.$.ajax_id.generateRequest();
-        this.$.spinner_id.active = true;
+        this._loading = true;
     }
 
     _addCourse(name) {
@@ -296,7 +334,7 @@ class NavView extends PolymerElement {
             id: getId('course')
         });
         this.$.ajax_id.generateRequest();
-        this.$.spinner_id.active = true;
+        this._loading = true;
     }
 
     _saveData(data) {
@@ -308,12 +346,12 @@ class NavView extends PolymerElement {
         this.$.ajax_id.body = JSON.stringify(data);
         this.$.ajax_id.params = {};
         this.$.ajax_id.generateRequest();
-        this.$.spinner_id.active = true;
+        this._loading = true;
     }
 
     _handleResponse(e) {
         console.log('_handleResponse(response)', e.detail.response);
-        this.$.spinner_id.active = false;
+        this._loading = false;
         switch (e.detail.response.path) {
             case '/lms/fetch':
                 this._currentData = e.detail.response;
@@ -335,8 +373,9 @@ class NavView extends PolymerElement {
         }
     }
 
-    _onCountChange(val) {
-
+    _onProgressChange(val) {
+        console.log('_onProgressChange(val)', val);
+        this.$.progressL_id.value = val;
     }
 
     _onAdd(e) {
@@ -386,6 +425,17 @@ class NavView extends PolymerElement {
     _onReload(e) {
         this._reload = true;
         this._fetchData({ id: this._currentId });
+        let _credentials = getData('credentials');
+        this.$.loader_id._fetchData({ id: _credentials.email });
+    }
+
+    _onSelect(e) {
+        this._onEdit(e);
+    }
+
+    _onLoadEnd(e) {
+        this._treeData = this.$.loader_id.getTree();
+        this._loading = false;
     }
 
     _dataFilter(item) {

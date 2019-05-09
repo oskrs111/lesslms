@@ -1,8 +1,8 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
 import { setData_L, getData_L } from '../lesslms-frontend-app/lesslms-common.js';
+import '../../node_modules/@polymer/paper-progress/paper-progress.js'
 import '../../node_modules/@polymer/paper-button/paper-button.js'
 import '../../node_modules/@polymer/paper-input/paper-input.js'
-import '../../node_modules/@polymer/paper-progress/paper-progress.js'
 import '../../node_modules/@polymer/paper-styles/shadow.js'
 import '../../node_modules/@polymer/paper-styles/typography.js'
 import '../../node_modules/@polymer/paper-styles/color.js'
@@ -68,6 +68,7 @@ class PaperLoginscreen extends PolymerElement {
 
       paper-progress {
           width: 100%;
+          --paper-progress-active-color: var(--paper-blue-700);
       }
 
       #errorMsg {
