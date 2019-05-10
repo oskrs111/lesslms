@@ -32,13 +32,16 @@ import '../../node_modules/@polymer/paper-listbox/paper-listbox.js';
 import '../../node_modules/@polymer/paper-item/paper-item.js';
 import '../../node_modules/@polymer/iron-icons/iron-icons.js';
 const $_documentContainer = document.createElement('template');
-
+//https://www.webcomponents.org/element/@polymer/iron-icons/demo/demo/index.html
 $_documentContainer.innerHTML = `<dom-module id="paper-tree-node">
 <template>
     <style>
         :host {
             font-size: 100%;
-            /*--iron-icon-stroke-color: var(--paper-blue-700) !important;*/
+            --item-selected: #19d275;
+            --item-selected-border: 2px solid var(--item-selected);
+            --item-default-border: 2px solid transparent;
+            --item-border: var(--item-default-border);
             --iron-icon-fill-color: var(--paper-blue-700) !important;
         }
 
@@ -91,6 +94,10 @@ $_documentContainer.innerHTML = `<dom-module id="paper-tree-node">
             width: 24px;
             height: 24px;
             @apply(--paper-tree-icon-theme);
+        }
+
+        .node-name {
+            border-bottom: var(--item-border);
         }
 
         #actions {
@@ -252,6 +259,25 @@ Polymer({
     toggleChildren: function() {
         this.set("data.open", !this.data.open && this.data.children && this.data.children.length);
         setTimeout(this.fire.bind(this, "toggle", this));
+    },
+
+    _onSelected: function(e) {
+        if (e.detail.id == this.data.id) {
+            this.updateStyles({ '--iron-icon-stroke-color': 'var(--item-selected)' });
+            this.updateStyles({ '--item-border': 'var(--item-selected-border)' });
+        } else {
+            this.updateStyles({ '--iron-icon-stroke-color': 'none' });
+            this.updateStyles({ '--item-border': 'var(--item-default-border)' });
+        }
+    },
+
+    _onCollapse: function(e) {
+        this.set("data.open", false);
+    },
+
+    ready: function() {
+        document.addEventListener('selected', (e) => { this._onSelected(e) });
+        document.addEventListener('collapse', (e) => { this._onCollapse(e) });
     }
 
 });

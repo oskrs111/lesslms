@@ -6,6 +6,7 @@ import '../../node_modules/@polymer/paper-radio-group/paper-radio-group.js';
 import '../../node_modules/@polymer/marked-element/marked-element.js';
 import '../../node_modules/@polymer/paper-input/paper-textarea.js';
 import '../../node_modules/@polymer/paper-input/paper-input.js';
+import '../paper-tree/paper-tree.js';
 
 /**
  * `form-selector`
@@ -20,40 +21,45 @@ const _formTypeMap = {
         _arg1: 'email',
         _arg2: 'profile'
     },
-    course: {
-        _arg1: 'subject',
-        _arg2: 'abstract'
-    },
-    definition: {
+    Course: {
         _arg1: 'author',
         _arg2: 'title',
-        _arg3: 'version',
-        _arg4: 'date'
+        _arg3: 'subject',
+        _arg4: 'abstract',
+        _arg5: 'version',
+        _arg6: 'date'
     },
-    content: {
-        _arg1: 'index'
+    Content: {
+        _obj1: 'index'
     },
-    topic: {
+    Topic: {
         _arg1: 'title',
-        _arg2: 'index'
+        _obj1: 'index'
     },
-    chapter: {
+    Chapter: {
         _arg1: 'title',
         _arg2: 'content'
     },
-    evaluation: {
+    Evaluation: {
         _arg1: 'abstract'
     },
-    question: {
+    Question: {
         _arg1: 'type',
         _arg2: 'value',
         _arg3: 'number',
         _arg4: 'statement',
     },
-    solution: {
+    Solution: {
         _arg1: 'detail'
     }
 }
+
+/*
+\"name\":\"Please update index.\",
+                    \"icon\": \"icons:error-outline\",
+                    \"open\": \"true\",
+                    \"children\": []
+*/
 
 class FormSelector extends PolymerElement {
     static get template() {
@@ -71,6 +77,16 @@ class FormSelector extends PolymerElement {
         .form-row {
           @apply --layout-horizontal;
           margin-top: 15px;
+        }
+
+        .form-row-space {
+            @apply --layout-horizontal;
+            justify-content: space-between;
+            margin-top: 15px;            
+          }
+
+        .form-row-space h2 {
+            margin: 0;
         }
 
         .form-row paper-input, paper-textarea {
@@ -94,7 +110,13 @@ class FormSelector extends PolymerElement {
             --paper-input-container-underline-focus: {
                 border-color: var(--paper-blue-1000);              
             }
-    }
+        }
+
+        paper-button {
+            background-color: var(--paper-blue-700) !important;
+            text-align: center;
+            color: white;
+          }
         
 
       </style>
@@ -111,38 +133,57 @@ class FormSelector extends PolymerElement {
       </section>  
       
       <section id="course_form_id">        
-        <div class="form-row">
-            <paper-input always-float-label label="Subject Name:" value="{{_arg1}}"></paper-input>
-            <paper-radio-group selected="{{_viewMode}}">
+        <div class="form-row">        
+            <paper-input always-float-label label="Author Name:" value="{{_arg1}}"></paper-input>        
+            <paper-input always-float-label label="Title:" value="{{_arg2}}"></paper-input>
+            <paper-input always-float-label label="Subject Name:" value="{{_arg3}}"></paper-input>            
+        </div>
+        <div class="form-row-space">
+        <paper-radio-group selected="{{_viewMode}}">
             <paper-radio-button name="txt">Text</paper-radio-button>
             <paper-radio-button name="md">Markdown</paper-radio-button>
             </paper-radio-group>
+        <paper-button class="header-buttons" on-click="_onPublish" raised>PUBLISH COURSE</paper-button>    
         </div>
         <div class="form-row">
             <template is="dom-if" if="[[_isMarkdown]]">
-                <marked-element markdown="[[_arg2]]">
+                <marked-element markdown="[[_arg4]]">
                 <div slot="markdown-html"></div>
                 </marked-element>
             </template>
             <template is="dom-if" if="[[!_isMarkdown]]">
-                <paper-textarea class="text" label="Course abstract:" value="{{_arg2}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write course abstract here..."></paper-textarea>
+                <paper-textarea class="text" label="Course abstract:" value="{{_arg4}}" rows="10" char-counter="true" maxlength="1000" placeholder="Write course abstract here..."></paper-textarea>
             </template>
+        </div>
+        <div class="form-row">
+        <paper-input always-float-label label="Version:" value="{{_arg5}}"></paper-input>        
+        <paper-input always-float-label label="Date:" value="{{_arg6}}"></paper-input>
         </div>
       </section>     
       
       <section id="content_form_id">        
+        <div class="form-row-space">
+        <h2>INDEX:</h2>
+        <paper-button class="header-buttons" on-click="_onUpdateContentIndex" raised>UPDATE INDEX</paper-button>
+        </div>              
         <div class="form-row">
-        <h2>INDEX</h2>
-        </div>                
+        <paper-tree data="[[_obj1]]">
+        </paper-tree>    
+        </div>              
       </section>        
 
       <section id="topic_form_id">        
         <div class="form-row">
             <paper-input always-float-label label="Topic title:" value="{{_arg1}}"></paper-input>        
         </div>                
+        <div class="form-row-space">
+            <h2>INDEX:</h2>
+            <paper-button class="header-buttons" on-click="_onUpdateTopicIndex" raised>UPDATE INDEX</paper-button>
+        </div>       
         <div class="form-row">
-            <h2>INDEX</h2>
-        </div>                
+        <paper-tree data="[[_obj1]]">
+        </paper-tree>    
+        </div>                       
       </section>      
 
       <section id="chapter_form_id">        
@@ -252,24 +293,7 @@ class FormSelector extends PolymerElement {
             <paper-textarea class="text" label="Chapter content:" value="{{_arg2}}" rows="15" char-counter="true" maxlength="15000" placeholder="Write chapter content..."></paper-textarea>        
             </template>
         </div>                
-      </section>  
-    
-      <section id="definition_form_id">        
-        <div class="form-row">
-        <paper-input always-float-label label="Author Name:" value="{{_arg1}}"></paper-input>
-        </div>
-        <div class="form-row">
-        <paper-input always-float-label label="Title:" value="{{_arg2}}"></paper-input>
-        </div>                
-        <div class="form-row">
-        <paper-input always-float-label label="Version:" value="{{_arg3}}"></paper-input>
-        </div>        
-        <div class="form-row">
-        <paper-input always-float-label label="Date:" value="{{_arg4}}"></paper-input>
-        </div>                
-      </section>      
-           
-     
+      </section>       
       </div>
     `;
     }
@@ -299,6 +323,19 @@ class FormSelector extends PolymerElement {
             _arg5: {
                 type: String,
                 value: ''
+            },
+            _arg6: {
+                type: String,
+                value: ''
+            },
+            _obj1: {
+                type: Object,
+                value: {
+                    name: "...",
+                    icon: "icons:radio-button-unchecked",
+                    open: true,
+                    children: []
+                }
             },
             _formData: {
                 type: Object,
@@ -331,44 +368,41 @@ class FormSelector extends PolymerElement {
             case 'root':
                 break;
 
-            case 'course':
+            case 'Course':
+                _content[_map['_arg1']] = this._arg1;
+                _content[_map['_arg2']] = this._arg2;
+                _content[_map['_arg3']] = this._arg3;
+                _content[_map['_arg4']] = this._arg4;
+                _content[_map['_arg5']] = this._arg5;
+                _content[_map['_arg6']] = this._arg6;
+                break;
+
+            case 'Content':
+                _content[_map['_obj1']] = this._obj1;
+                break;
+
+            case 'Topic':
+                _content[_map['_obj1']] = this._obj1;
+                _content[_map['_arg1']] = this._arg1;
+                break;
+
+            case 'Chapter':
                 _content[_map['_arg1']] = this._arg1;
                 _content[_map['_arg2']] = this._arg2;
                 break;
 
-            case 'definition':
+            case 'Evaluation':
+                _content[_map['_arg1']] = this._arg1;
+                break;
+
+            case 'Question':
                 _content[_map['_arg1']] = this._arg1;
                 _content[_map['_arg2']] = this._arg2;
                 _content[_map['_arg3']] = this._arg3;
                 _content[_map['_arg4']] = this._arg4;
                 break;
 
-            case 'content':
-                _content[_map['_arg1']] = this._arg1;
-                break;
-
-            case 'topic':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                break;
-
-            case 'chapter':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                break;
-
-            case 'evaluation':
-                _content[_map['_arg1']] = this._arg1;
-                break;
-
-            case 'question':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                _content[_map['_arg3']] = this._arg3;
-                _content[_map['_arg4']] = this._arg4;
-                break;
-
-            case 'solution':
+            case 'Solution':
                 _content[_map['_arg1']] = this._arg1;
                 break;
 
@@ -379,7 +413,7 @@ class FormSelector extends PolymerElement {
 
         //OSLL: Create a copy of form data
 
-        let _data = Object.assign({}, this._formData);
+        let _data = JSON.parse(JSON.stringify(this._formData));
         _data.content = _content;
         _data.id = this._formData.sourceId;
         _data.rid = this._formData.relatedId;
@@ -398,6 +432,8 @@ class FormSelector extends PolymerElement {
         this._arg3 = '';
         this._arg4 = '';
         this._arg5 = '';
+        this._arg6 = '';
+        this._obj1 = {};
     }
 
     _onViewModeChange(val) {
@@ -413,6 +449,9 @@ class FormSelector extends PolymerElement {
         }
         let _map = _formTypeMap[val];
         let _content = {};
+        if (this._formData.content != undefined) {
+            _content = JSON.parse(this._formData.content);
+        }
         switch (val) {
             case 'root':
                 let _credentials = getData('credentials');
@@ -422,50 +461,39 @@ class FormSelector extends PolymerElement {
                 this.$.root_form_id.style.display = 'block';
                 break;
 
-            case 'course':
-                _content = JSON.parse(this._formData.content);
-                this._arg1 = _content[_map['_arg1']];
-                this._arg2 = _content[_map['_arg2']];
-                this.$.course_form_id.style.display = 'block';
-                break;
-
-            case 'definition':
-                _content = JSON.parse(this._formData.content);
+            case 'Course':
                 this._arg1 = _content[_map['_arg1']];
                 this._arg2 = _content[_map['_arg2']];
                 this._arg3 = _content[_map['_arg3']];
                 this._arg4 = _content[_map['_arg4']];
-                this.$.definition_form_id.style.display = "block";
+                this._arg5 = _content[_map['_arg5']];
+                this._arg6 = _content[_map['_arg6']];
+                this.$.course_form_id.style.display = 'block';
                 break;
 
-            case 'content':
-                _content = JSON.parse(this._formData.content);
-                this._arg1 = _content[_map['_arg1']];
+            case 'Content':
+                this._obj1 = _content[_map['_obj1']];
                 this.$.content_form_id.style.display = "block";
                 break;
 
-            case 'topic':
-                _content = JSON.parse(this._formData.content);
+            case 'Topic':
+                this._obj1 = _content[_map['_obj1']];
                 this._arg1 = _content[_map['_arg1']];
-                this._arg2 = _content[_map['_arg2']];
                 this.$.topic_form_id.style.display = "block";
                 break;
 
-            case 'chapter':
-                _content = JSON.parse(this._formData.content);
+            case 'Chapter':
                 this._arg1 = _content[_map['_arg1']];
                 this._arg2 = _content[_map['_arg2']];
                 this.$.chapter_form_id.style.display = "block";
                 break;
 
-            case 'evaluation':
-                _content = JSON.parse(this._formData.content);
+            case 'Evaluation':
                 this._arg1 = _content[_map['_arg1']];
                 this.$.evaluation_form_id.style.display = "block";
                 break;
 
-            case 'question':
-                _content = JSON.parse(this._formData.content);
+            case 'Question':
                 this._arg1 = _content[_map['_arg1']];
                 this._arg2 = _content[_map['_arg2']];
                 this._arg3 = _content[_map['_arg3']];
@@ -473,8 +501,7 @@ class FormSelector extends PolymerElement {
                 this.$.question_form_id.style.display = "block";
                 break;
 
-            case 'solution':
-                _content = JSON.parse(this._formData.content);
+            case 'Solution':
                 this._arg1 = _content[_map['_arg1']];
                 this.$.solution_form_id.style.display = "block";
                 break;
@@ -482,6 +509,28 @@ class FormSelector extends PolymerElement {
             default:
                 break;
         }
+    }
+
+    _onUpdateContentIndex() {
+        this.dispatchEvent(new CustomEvent('update-index', {
+            detail: {
+                id: this._formData.sourceId,
+                callback: (indexStr) => {
+                    this._obj1 = JSON.parse(indexStr)
+                }
+            },
+            bubbles: true,
+            composed: true
+        }));
+    }
+
+    _onUpdateTopicIndex() {
+        //OSLL: Both forms use the same '_obj1' container.
+        this._onUpdateContentIndex();
+    }
+
+    _onPublish() {
+
     }
 
 } //class
