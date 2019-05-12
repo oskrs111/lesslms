@@ -384,7 +384,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
             let _credentials = getData('credentials');
             this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
             switch (e.detail.type) {
-                case 'course':
+                case 'Course':
                     this._addCourse(e.detail.name);
                     break;
 
@@ -394,7 +394,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
                     let _data = {
                         id: this._currentId,
                         rid: getId(e.detail.type),
-                        type: this._getStoreType(e.detail.type),
+                        type: this.getStoreType(e.detail.type),
                         content: {}
                     }
                     this._saveData(_data);
@@ -497,8 +497,8 @@ class NavView extends LesslmsMixin(PolymerElement) {
                             //OSLL: Update navigation references  
                             if (this._reload == false) {
                                 this._updatePath('push', this.type);
-                                this._updateLocation(i.sourceId);
-                                this._currentId = i.sourceId;
+                                this._updateLocation(i.sourceId.S);
+                                this._currentId = i.sourceId.S;
                             }
                             this._reload = false;
 

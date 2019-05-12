@@ -1,5 +1,6 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
 import { getData } from '../lesslms-frontend-app/lesslms-common.js';
+import { LesslmsMixin } from '../lesslms-mixin/lesslms-mixin.js'
 import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-radio-button/paper-radio-button.js';
 import '../../node_modules/@polymer/paper-radio-group/paper-radio-group.js';
@@ -61,9 +62,9 @@ const _formTypeMap = {
                     \"children\": []
 */
 
-class FormSelector extends PolymerElement {
-    static get template() {
-        return html `
+class FormSelector extends LesslmsMixin(PolymerElement) {
+        static get template() {
+            return html `
       <style is="custom-style" include="iron-flex iron-flex-alignment"></style>    
       <style>
         :host {
@@ -296,238 +297,239 @@ class FormSelector extends PolymerElement {
       </section>       
       </div>
     `;
-    }
-    static get properties() {
-        return {
-            type: {
-                type: String,
-                value: 'default',
-                observer: '_onTypeChange'
-            },
-            _arg1: {
-                type: String,
-                value: ''
-            },
-            _arg2: {
-                type: String,
-                value: ''
-            },
-            _arg3: {
-                type: String,
-                value: ''
-            },
-            _arg4: {
-                type: String,
-                value: ''
-            },
-            _arg5: {
-                type: String,
-                value: ''
-            },
-            _arg6: {
-                type: String,
-                value: ''
-            },
-            _obj1: {
-                type: Object,
-                value: {
-                    name: "...",
-                    icon: "icons:radio-button-unchecked",
-                    open: true,
-                    children: []
-                }
-            },
-            _formData: {
-                type: Object,
-                value: {}
-            },
-            _viewMode: {
-                type: String,
-                value: 'txt',
-                observer: '_onViewModeChange'
+        }
+        static get properties() {
+            return {
+                type: {
+                    type: String,
+                    value: 'default'
+                        //observer: '_onTypeChange'
+                },
+                _arg1: {
+                    type: String,
+                    value: ''
+                },
+                _arg2: {
+                    type: String,
+                    value: ''
+                },
+                _arg3: {
+                    type: String,
+                    value: ''
+                },
+                _arg4: {
+                    type: String,
+                    value: ''
+                },
+                _arg5: {
+                    type: String,
+                    value: ''
+                },
+                _arg6: {
+                    type: String,
+                    value: ''
+                },
+                _obj1: {
+                    type: Object,
+                    value: {
+                        name: "...",
+                        icon: "icons:radio-button-unchecked",
+                        open: true,
+                        children: []
+                    }
+                },
+                _formData: {
+                    type: Object,
+                    value: {}
+                },
+                _viewMode: {
+                    type: String,
+                    value: 'txt',
+                    observer: '_onViewModeChange'
 
-            },
-            _isMarkdown: {
-                type: Boolean,
-                value: false
+                },
+                _isMarkdown: {
+                    type: Boolean,
+                    value: false
+                }
+            };
+
+        }
+
+        setFormData(data) {
+            console.log('setFormData(data)', data);
+            this._formData = data;
+            this._onTypeChange(this.getLocalType(this._formData.type.S));
+        }
+
+        getFormData() {
+            let _content = {};
+            //OSLL: Use '_formTypeMap' to get form fields data,
+            let _map = _formTypeMap[this.type];
+            switch (this.type) {
+                case 'root':
+                    break;
+
+                case 'Course':
+                    _content[_map['_arg1']] = this._arg1;
+                    _content[_map['_arg2']] = this._arg2;
+                    _content[_map['_arg3']] = this._arg3;
+                    _content[_map['_arg4']] = this._arg4;
+                    _content[_map['_arg5']] = this._arg5;
+                    _content[_map['_arg6']] = this._arg6;
+                    break;
+
+                case 'Content':
+                    _content[_map['_obj1']] = this._obj1;
+                    break;
+
+                case 'Topic':
+                    _content[_map['_obj1']] = this._obj1;
+                    _content[_map['_arg1']] = this._arg1;
+                    break;
+
+                case 'Chapter':
+                    _content[_map['_arg1']] = this._arg1;
+                    _content[_map['_arg2']] = this._arg2;
+                    break;
+
+                case 'Evaluation':
+                    _content[_map['_arg1']] = this._arg1;
+                    break;
+
+                case 'Question':
+                    _content[_map['_arg1']] = this._arg1;
+                    _content[_map['_arg2']] = this._arg2;
+                    _content[_map['_arg3']] = this._arg3;
+                    _content[_map['_arg4']] = this._arg4;
+                    break;
+
+                case 'Solution':
+                    _content[_map['_arg1']] = this._arg1;
+                    break;
+
+                default:
+                    return {};
+                    break;
             }
-        };
 
-    }
-
-    setFormData(data) {
-        console.log('setFormData(data)', data);
-        this._formData = data;
-    }
-
-    getFormData() {
-        let _content = {};
-        //OSLL: Use '_formTypeMap' to get form fields data,
-        let _map = _formTypeMap[this.type];
-        switch (this.type) {
-            case 'root':
-                break;
-
-            case 'Course':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                _content[_map['_arg3']] = this._arg3;
-                _content[_map['_arg4']] = this._arg4;
-                _content[_map['_arg5']] = this._arg5;
-                _content[_map['_arg6']] = this._arg6;
-                break;
-
-            case 'Content':
-                _content[_map['_obj1']] = this._obj1;
-                break;
-
-            case 'Topic':
-                _content[_map['_obj1']] = this._obj1;
-                _content[_map['_arg1']] = this._arg1;
-                break;
-
-            case 'Chapter':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                break;
-
-            case 'Evaluation':
-                _content[_map['_arg1']] = this._arg1;
-                break;
-
-            case 'Question':
-                _content[_map['_arg1']] = this._arg1;
-                _content[_map['_arg2']] = this._arg2;
-                _content[_map['_arg3']] = this._arg3;
-                _content[_map['_arg4']] = this._arg4;
-                break;
-
-            case 'Solution':
-                _content[_map['_arg1']] = this._arg1;
-                break;
-
-            default:
-                return {};
-                break;
-        }
-
-        //let _data = JSON.parse(JSON.stringify(this._formData));
-        let _data = {
-            content: _content,
-            id: this._formData.sourceId.S,
-            rid: this._formData.relatedId.S,
-            type: this._formData.type.S
-        }
-
-        return _data;
-    }
-
-    clearFormData() {
-        this._arg1 = '';
-        this._arg2 = '';
-        this._arg3 = '';
-        this._arg4 = '';
-        this._arg5 = '';
-        this._arg6 = '';
-        this._obj1 = {};
-    }
-
-    _onViewModeChange(val) {
-        if (val == 'md') this._isMarkdown = true;
-        else this._isMarkdown = false;
-    }
-
-    _onTypeChange(val) {
-        this.clearFormData();
-        let _forms = this.$.wrapper_id.getElementsByTagName('section');
-        for (let f of _forms) {
-            f.style.display = 'none';
-        }
-        let _map = _formTypeMap[val];
-        let _content = {};
-        if (this._formData.content != undefined) {
-            _content = JSON.parse(this._formData.content.S);
-        }
-        switch (val) {
-            case 'root':
-                let _credentials = getData('credentials');
-                //OSLL: Use '_formTypeMap' to set form fields
-                this._arg1 = _credentials[_map['_arg1']];
-                this._arg2 = _credentials[_map['_arg2']];
-                this.$.root_form_id.style.display = 'block';
-                break;
-
-            case 'Course':
-                this._arg1 = _content[_map['_arg1']];
-                this._arg2 = _content[_map['_arg2']];
-                this._arg3 = _content[_map['_arg3']];
-                this._arg4 = _content[_map['_arg4']];
-                this._arg5 = _content[_map['_arg5']];
-                this._arg6 = _content[_map['_arg6']];
-                this.$.course_form_id.style.display = 'block';
-                break;
-
-            case 'Content':
-                this._obj1 = _content[_map['_obj1']];
-                this.$.content_form_id.style.display = "block";
-                break;
-
-            case 'Topic':
-                this._obj1 = _content[_map['_obj1']];
-                this._arg1 = _content[_map['_arg1']];
-                this.$.topic_form_id.style.display = "block";
-                break;
-
-            case 'Chapter':
-                this._arg1 = _content[_map['_arg1']];
-                this._arg2 = _content[_map['_arg2']];
-                this.$.chapter_form_id.style.display = "block";
-                break;
-
-            case 'Evaluation':
-                this._arg1 = _content[_map['_arg1']];
-                this.$.evaluation_form_id.style.display = "block";
-                break;
-
-            case 'Question':
-                this._arg1 = _content[_map['_arg1']];
-                this._arg2 = _content[_map['_arg2']];
-                this._arg3 = _content[_map['_arg3']];
-                this._arg4 = _content[_map['_arg4']];
-                this.$.question_form_id.style.display = "block";
-                break;
-
-            case 'Solution':
-                this._arg1 = _content[_map['_arg1']];
-                this.$.solution_form_id.style.display = "block";
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    _onUpdateContentIndex() {
-        this.dispatchEvent(new CustomEvent('update-index', {
-            detail: {
+            //let _data = JSON.parse(JSON.stringify(this._formData));
+            let _data = {
+                content: _content,
                 id: this._formData.sourceId.S,
-                callback: (indexStr) => {
-                    this._obj1 = JSON.parse(indexStr)
-                }
-            },
-            bubbles: true,
-            composed: true
-        }));
-    }
+                rid: this._formData.relatedId.S,
+                type: this._formData.type.S
+            }
 
-    _onUpdateTopicIndex() {
-        //OSLL: Both forms use the same '_obj1' container.
-        this._onUpdateContentIndex();
-    }
+            return _data;
+        }
 
-    _onPublish() {
+        clearFormData() {
+            this._arg1 = '';
+            this._arg2 = '';
+            this._arg3 = '';
+            this._arg4 = '';
+            this._arg5 = '';
+            this._arg6 = '';
+            this._obj1 = {};
+        }
 
-    }
+        _onViewModeChange(val) {
+            if (val == 'md') this._isMarkdown = true;
+            else this._isMarkdown = false;
+        }
 
-} //class
+        _onTypeChange(val) {
+            this.clearFormData();
+            let _forms = this.$.wrapper_id.getElementsByTagName('section');
+            for (let f of _forms) {
+                f.style.display = 'none';
+            }
+            let _map = _formTypeMap[val];
+            let _content = {};
+            if (this._formData.content != undefined) {
+                _content = JSON.parse(this._formData.content.S);
+            }
+            switch (val) {
+                case 'root':
+                    let _credentials = getData('credentials');
+                    //OSLL: Use '_formTypeMap' to set form fields
+                    this._arg1 = _credentials[_map['_arg1']];
+                    this._arg2 = _credentials[_map['_arg2']];
+                    this.$.root_form_id.style.display = 'block';
+                    break;
+
+                case 'Course':
+                    this._arg1 = _content[_map['_arg1']];
+                    this._arg2 = _content[_map['_arg2']];
+                    this._arg3 = _content[_map['_arg3']];
+                    this._arg4 = _content[_map['_arg4']];
+                    this._arg5 = _content[_map['_arg5']];
+                    this._arg6 = _content[_map['_arg6']];
+                    this.$.course_form_id.style.display = 'block';
+                    break;
+
+                case 'Content':
+                    this._obj1 = _content[_map['_obj1']];
+                    this.$.content_form_id.style.display = "block";
+                    break;
+
+                case 'Topic':
+                    this._obj1 = _content[_map['_obj1']];
+                    this._arg1 = _content[_map['_arg1']];
+                    this.$.topic_form_id.style.display = "block";
+                    break;
+
+                case 'Chapter':
+                    this._arg1 = _content[_map['_arg1']];
+                    this._arg2 = _content[_map['_arg2']];
+                    this.$.chapter_form_id.style.display = "block";
+                    break;
+
+                case 'Evaluation':
+                    this._arg1 = _content[_map['_arg1']];
+                    this.$.evaluation_form_id.style.display = "block";
+                    break;
+
+                case 'Question':
+                    this._arg1 = _content[_map['_arg1']];
+                    this._arg2 = _content[_map['_arg2']];
+                    this._arg3 = _content[_map['_arg3']];
+                    this._arg4 = _content[_map['_arg4']];
+                    this.$.question_form_id.style.display = "block";
+                    break;
+
+                case 'Solution':
+                    this._arg1 = _content[_map['_arg1']];
+                    this.$.solution_form_id.style.display = "block";
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        _onUpdateContentIndex() {
+            this.dispatchEvent(new CustomEvent('update-index', {
+                detail: {
+                    id: this._formData.sourceId.S,
+                    callback: (indexStr) => {
+                        this._obj1 = JSON.parse(indexStr)
+                    }
+                },
+                bubbles: true,
+                composed: true
+            }));
+        }
+
+        _onUpdateTopicIndex() {
+            //OSLL: Both forms use the same '_obj1' container.
+            this._onUpdateContentIndex();
+        }
+
+        _onPublish() {
+
+        }
+
+    } //class
 window.customElements.define('form-selector', FormSelector);
