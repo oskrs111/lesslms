@@ -13,7 +13,7 @@ Example:
   then delete this comment!
 */
 import { Polymer, html } from '../../node_modules/@polymer/polymer/polymer-legacy.js';
-import './paper-tree-node.js';
+import './paper-tree-node-ext.js';
 
 Polymer({
     _template: html `

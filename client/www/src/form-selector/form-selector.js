@@ -6,7 +6,7 @@ import '../../node_modules/@polymer/paper-radio-group/paper-radio-group.js';
 import '../../node_modules/@polymer/marked-element/marked-element.js';
 import '../../node_modules/@polymer/paper-input/paper-textarea.js';
 import '../../node_modules/@polymer/paper-input/paper-input.js';
-import '../paper-tree/paper-tree.js';
+import '../paper-tree-ext/paper-tree-ext.js';
 
 /**
  * `form-selector`
@@ -411,18 +411,14 @@ class FormSelector extends PolymerElement {
                 break;
         }
 
-        //OSLL: Create a copy of form data
+        //let _data = JSON.parse(JSON.stringify(this._formData));
+        let _data = {
+            content: _content,
+            id: this._formData.sourceId.S,
+            rid: this._formData.relatedId.S,
+            type: this._formData.type.S
+        }
 
-        let _data = JSON.parse(JSON.stringify(this._formData));
-        _data.content = _content;
-        _data.id = this._formData.sourceId;
-        _data.rid = this._formData.relatedId;
-
-        //OSLL: These properties are no longer need.
-        delete _data.sourceId;
-        delete _data.relatedId;
-        delete _data.cDate;
-        delete _data.mDate;
         return _data;
     }
 
@@ -450,7 +446,7 @@ class FormSelector extends PolymerElement {
         let _map = _formTypeMap[val];
         let _content = {};
         if (this._formData.content != undefined) {
-            _content = JSON.parse(this._formData.content);
+            _content = JSON.parse(this._formData.content.S);
         }
         switch (val) {
             case 'root':
@@ -514,7 +510,7 @@ class FormSelector extends PolymerElement {
     _onUpdateContentIndex() {
         this.dispatchEvent(new CustomEvent('update-index', {
             detail: {
-                id: this._formData.sourceId,
+                id: this._formData.sourceId.S,
                 callback: (indexStr) => {
                     this._obj1 = JSON.parse(indexStr)
                 }

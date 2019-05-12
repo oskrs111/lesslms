@@ -16,8 +16,6 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
             document.addEventListener('get', (e) => { this._onGet(e) });
             document.addEventListener('fetch', (e) => { this._onFetch(e) });
             this._fetchQuewe = [];
-            //            this._nodeMap = [];
-            //            this._nodePointers = [];
             this._tree = this.clearReferences();
         }
 
@@ -63,6 +61,7 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
             }
 
             let _credentials = getData('credentials');
+            params.region = _credentials.region;
             this.$.ajax_id.url = getData_L('uri') + 'lms/fetch';
             this.$.ajax_id.method = 'GET';
             this.$.ajax_id.body = {};
@@ -78,42 +77,42 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
                     switch (e.detail.response.response.resolved) {
                         case 'users':
                             for (let i of e.detail.response.response.Items) {
-                                this._fetchQuewe.push(i.sourceId);
+                                this._fetchQuewe.push(i.sourceId.S);
                                 i.index = this._loadIndex++;
                                 let _new = this.buildNewNode();
-                                _new.name = JSON.parse(i.attributes).name;
-                                _new.id = i.sourceId;
+                                _new.name = JSON.parse(i.attributes.S).name;
+                                _new.id = i.sourceId.S;
                                 _new.icon = this.getIcon('tCOURSE');
-                                this._tree.id = i.userId; //OSLL: Will be allways the same id.
-                                this._tree.name = i.userId;
+                                this._tree.id = i.userId.S; //OSLL: Will be allways the same id.
+                                this._tree.name = i.userId.S;
                                 this._tree.type = 'root';
-                                this.push2Map(i.sourceId, 'root');
+                                this.push2Map(i.sourceId.S, 'root');
                                 this.push2Pointers('root', this._tree); //OSLL: Store the root pointer reference.                            
-                                console.log('_fetchQuewe.push(i.sourceId)', i.sourceId);
+                                console.log('_fetchQuewe.push(i.sourceId)', i.sourceId.S);
                             }
                             break;
 
                         case 'courses':
                             let _new = this.buildNewNode();
                             for (let t of e.detail.response.response.Items) {
-                                this._fetchQueweShift(t.sourceId);
+                                this._fetchQueweShift(t.sourceId.S);
                                 //OSLL: Store the parent id for current element.                            
-                                if (t.sourceId == t.relatedId) {
+                                if (t.sourceId.S == t.relatedId.S) {
                                     //OSLL: Here not expecting to get more than one item.                                
                                     //      These nodes contain information.                                                                
-                                    _new.name = this.getLocalType(t.type);
-                                    _new.id = t.sourceId;
-                                    _new.icon = this.getIcon(t.type);
-                                    _new.type = t.type;
+                                    _new.name = this.getLocalType(t.type.S);
+                                    _new.id = t.sourceId.S;
+                                    _new.icon = this.getIcon(t.type.S);
+                                    _new.type = t.type.S;
                                     this.push2Pointers(_new.id, _new); //OSLL: Store the pointer reference.
 
                                 } else {
                                     //OSLL: Act only as an index reference.
                                     //      Here store the parent of current element.
                                     //this._nodeMap[t.relatedId] = t.sourceId;
-                                    this.push2Map(t.relatedId, t.sourceId);
-                                    this._fetchQuewe.push(t.relatedId);
-                                    console.log('_fetchQuewe.push(t.relatedId)', t.relatedId);
+                                    this.push2Map(t.relatedId.S, t.sourceId.S);
+                                    this._fetchQuewe.push(t.relatedId.S);
+                                    console.log('_fetchQuewe.push(t.relatedId)', t.relatedId.S);
                                 }
                                 this.progress++;
                             }

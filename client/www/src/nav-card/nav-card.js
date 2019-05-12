@@ -160,7 +160,8 @@ class NavCard extends PolymerElement {
         this.$.ajax_id.method = 'GET';
         this.$.ajax_id.body = {};
         this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
-        this.$.ajax_id.params = { id: id };
+        this.$.ajax_id.params = { id: id, region: _credentials.region };
+
 
         //OSLL: Clean up card display.
         this._cardCount = 0;
@@ -276,12 +277,12 @@ class NavCard extends PolymerElement {
         if (this.type == 'course') {
             this.$.dialog_id.open();
         } else {
-            this.dispatchEvent(new CustomEvent(`add`, { detail: { type: this.type }, bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent('add', { detail: { type: this.type }, bubbles: true, composed: true }));
         }
     }
 
     _onEdit() {
-        this.dispatchEvent(new CustomEvent(`edit`, { detail: { id: this.id }, bubbles: true, composed: true }));
+        this.dispatchEvent(new CustomEvent('edit', { detail: { id: this.id }, bubbles: true, composed: true }));
     }
 
     _onReload() {
@@ -290,7 +291,7 @@ class NavCard extends PolymerElement {
 
     _onDialogClickAdd(e) {
         if (this.$.courseName_id.value.length > 5) {
-            this.dispatchEvent(new CustomEvent(`add`, { detail: { type: this.type, name: this.$.courseName_id.value }, bubbles: true, composed: true }));
+            this.dispatchEvent(new CustomEvent('add', { detail: { type: this.type, name: this.$.courseName_id.value }, bubbles: true, composed: true }));
             this.$.courseName_id.style.border = 'none';
             this.$.dialog_id.close();
         } else {

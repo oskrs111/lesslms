@@ -6,9 +6,9 @@ import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
 import '../../node_modules/@polymer/paper-progress/paper-progress.js'
 import '../../node_modules/@polymer/paper-button/paper-button.js';
 import '../../node_modules/@polymer/iron-icons/iron-icons.js';
+import '../paper-tree-ext/paper-tree-ext.js';
 import '../form-selector/form-selector.js';
 import '../course-loader/course-loader.js';
-import '../paper-tree/paper-tree.js';
 import '../nav-card/nav-card.js';
 
 /**
@@ -306,6 +306,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
         _fetchData(params) {
             console.log('_fetchData(params)', params);
             let _credentials = getData('credentials');
+            params.region = _credentials.region;
             this.$.ajax_id.url = getData_L('uri') + 'lms/fetch';
             this.$.ajax_id.method = 'GET';
             this.$.ajax_id.body = {};
@@ -330,6 +331,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
                 name: name,
                 user: _credentials.email,
                 profile: _credentials.profile,
+                region: _credentials.region,
                 id: getId('course')
             });
             this.$.ajax_id.generateRequest();
@@ -339,6 +341,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
         _saveData(data) {
             console.log('_saveData(data)', data);
             let _credentials = getData('credentials');
+            data.region = _credentials.region;
             this.$.ajax_id.url = getData_L('uri') + 'lms/update';
             this.$.ajax_id.method = 'POST';
             this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
@@ -462,17 +465,17 @@ class NavView extends LesslmsMixin(PolymerElement) {
                     this._addData = Array.from(_addTypeMap[this.type]);
                     if (items.length > 0) {
                         if (this._reload == false) {
-                            this._updateLocation(items[0].userId);
-                            this._currentId = items[0].userId;
+                            this._updateLocation(items[0].userId.S);
+                            this._currentId = items[0].userId.S;
                         }
                         this._reload = false;
 
                         for (let i of items) {
                             let _card = JSON.parse(JSON.stringify(_template));
-                            let _attributes = JSON.parse(i.attributes);
+                            let _attributes = JSON.parse(i.attributes.S);
                             _card.type = 'course';
-                            _card.title = `COURSE: ${_attributes.name}`;
-                            _card.id = i.sourceId;
+                            _card.title = `COURSE: ${_attributes.name.S}`;
+                            _card.id = i.sourceId.S;
                             _r.push(_card);
                         }
                     }
@@ -483,12 +486,12 @@ class NavView extends LesslmsMixin(PolymerElement) {
                     let _addData_ = [];
                     let _addDataCount = [];
                     for (let i of items) {
-                        if (i.sourceId == i.relatedId) {
+                        if (i.sourceId.S == i.relatedId.S) {
                             //OSLL: Form data corresponds to this item that shoul not be shown on content list.
                             //      By updating this.type, form and new options will automatically update on view.                        
                             //OSLL: Pass data to form before switch the view.
                             this.$.form_id.setFormData(i);
-                            this.type = this.getLocalType(i.type);
+                            this.type = this.getLocalType(i.type.S);
                             _addData_ = Array.from(_addTypeMap[this.type]);
 
                             //OSLL: Update navigation references  
@@ -500,7 +503,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
                             this._reload = false;
 
                         } else {
-                            let _type = this.getLocalType(i.type);
+                            let _type = this.getLocalType(i.type.S);
                             if (_addDataCount[_type] == undefined) {
                                 _addDataCount[_type] = { type: _type, count: 1 };
                             } else {
@@ -508,9 +511,9 @@ class NavView extends LesslmsMixin(PolymerElement) {
                             }
 
                             let _card = Object.assign({}, _template);
-                            _card.type = this.getLocalType(i.type);
-                            _card.title = i.type;
-                            _card.id = i.relatedId;
+                            _card.type = this.getLocalType(i.type.S);
+                            _card.title = i.type.S;
+                            _card.id = i.relatedId.S;
                             _r.push(_card);
                         }
                     }
