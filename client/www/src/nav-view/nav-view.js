@@ -37,6 +37,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
             super.ready();
             document.addEventListener('add', (e) => { this._onAdd(e) });
             document.addEventListener('edit', (e) => { this._onEdit(e) });
+            document.addEventListener('delete', (e) => { this._onDelete(e) });
             document.addEventListener('select', (e) => { this._onSelect(e) });
             document.addEventListener('load-end', (e) => { this._onLoadEnd(e) });
             document.addEventListener('load-updated', (e) => { this._onLoadEnd(e) });
@@ -181,6 +182,15 @@ class NavView extends LesslmsMixin(PolymerElement) {
         </section>
       </div>
       <course-loader id="loader_id" progress="{{_progress}}"></course-loader>
+      <paper-dialog id="dialog_id" verticalAlign="middle" modal>    
+      <h2>SURE TO DELETE?</h2>
+      <p>This operation can't be undone!</p>
+      <paper-input id="deleteYes_id" always-float-label label="Type 'yes' to delete... "></paper-input>
+      <footer>
+      <paper-button on-click="_onDialogClickAdd">DELETE</paper-button>
+      <paper-button on-click="_onDialogClickCancel">CANCEL</paper-button>
+      </footer>
+    </paper-dialog>
       <iron-ajax id="ajax_id"
       method=""  
       url=""      
@@ -332,7 +342,23 @@ class NavView extends LesslmsMixin(PolymerElement) {
                 user: _credentials.email,
                 profile: _credentials.profile,
                 region: _credentials.region,
-                id: getId('course')
+                id: getId('Course')
+            });
+            this.$.ajax_id.generateRequest();
+            this._loading = true;
+        }
+
+        _deleteElement(id) {
+            console.log('_deleteElement(id)', id);
+            let _credentials = getData('credentials');
+            this.$.ajax_id.url = getData_L('uri') + 'lms/delete';
+            this.$.ajax_id.method = 'POST';
+            this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
+            this.$.ajax_id.body = JSON.stringify({
+                id: id,
+                rid: this.getParentIdByChildId(id),
+                type: this.getNodeById(id).type,
+                region: _credentials.region
             });
             this.$.ajax_id.generateRequest();
             this._loading = true;
@@ -349,102 +375,6 @@ class NavView extends LesslmsMixin(PolymerElement) {
             this.$.ajax_id.params = {};
             this.$.ajax_id.generateRequest();
             this._loading = true;
-        }
-
-        _handleResponse(e) {
-            console.log('_handleResponse(response)', e.detail.response);
-            this._loading = false;
-            switch (e.detail.response.path) {
-                case '/lms/fetch':
-                    this._currentData = e.detail.response;
-                    this._cardData = this._getCardData(this._currentData.response.Items, this._currentData.response.resolved);
-                    break;
-
-                case '/lms/update':
-                    this._onReload();
-                    //alert('Data saved successfully!');
-                    break;
-
-                case '/lms/add':
-                    //OSLL: Fetch new data for current user.
-                    this.initialLoad();
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        _onProgressChange(val) {
-            console.log('_onProgressChange(val)', val);
-            this.$.progressL_id.value = val;
-        }
-
-        _onAdd(e) {
-            let _credentials = getData('credentials');
-            this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
-            switch (e.detail.type) {
-                case 'Course':
-                    this._addCourse(e.detail.name);
-                    break;
-
-                default:
-                    //OSLL: All other elements are added in the same way ;-)
-                    //      To add content just 'update' a new element.
-                    let _data = {
-                        id: this._currentId,
-                        rid: getId(e.detail.type),
-                        type: this.getStoreType(e.detail.type),
-                        content: {}
-                    }
-                    this._saveData(_data);
-                    break;
-            }
-        }
-
-        _onPublish(e) {
-
-        }
-
-        _onDelete(e) {
-
-        }
-
-        _onEdit(e) {
-            this._fetchData({ id: e.detail.id });
-            this.dispatchEvent(new CustomEvent('selected', { detail: { id: e.detail.id }, bubbles: true, composed: true }));
-        }
-
-        _onSave(e) {
-            this._saveData(this.$.form_id.getFormData());
-        }
-
-        _onBack(e) {
-            this._fetchData({ id: this._getPreviousLocation() });
-            this._updatePath('pop');
-        }
-
-        _onReload(e) {
-            this._reload = true;
-            this._fetchData({ id: this._currentId });
-            let _credentials = getData('credentials');
-            this.$.loader_id._fetchData({ id: _credentials.email }, true);
-        }
-
-        _onSelect(e) {
-            this._onEdit(e);
-        }
-
-        _onLoadEnd(e) {
-            this._treeData = this.$.loader_id.getTreeCopy();
-            this._loading = false;
-        }
-
-        _onUpdateIndex(e) {
-            console.log('_onUpdateIndex(e)', e.detail);
-            let _r = this.updateNode(this.getNodeCopyById(e.detail.id), 'icons:label');
-            _r = this.removeNodes(_r, 'tEVALUATION');
-            e.detail.callback(JSON.stringify(_r));
         }
 
         _dataFilter(item) {
@@ -540,6 +470,120 @@ class NavView extends LesslmsMixin(PolymerElement) {
                     break;
             }
             return _r;
+        }
+
+        _handleResponse(e) {
+            console.log('_handleResponse(response)', e.detail.response);
+            this._loading = false;
+            switch (e.detail.response.path) {
+                case '/lms/fetch':
+                    this._currentData = e.detail.response;
+                    this._cardData = this._getCardData(this._currentData.response.Items, this._currentData.response.resolved);
+                    break;
+
+                case '/lms/update':
+                case '/lms/delete':
+                    this._onReload();
+                    break;
+
+                case '/lms/add':
+                    //OSLL: Fetch new data for current user.
+                    this.initialLoad();
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        _onProgressChange(val) {
+            console.log('_onProgressChange(val)', val);
+            this.$.progressL_id.value = val;
+        }
+
+        _onAdd(e) {
+            let _credentials = getData('credentials');
+            this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
+            switch (e.detail.type) {
+                case 'Course':
+                    this._addCourse(e.detail.name);
+                    break;
+
+                default:
+                    //OSLL: All other elements are added in the same way ;-)
+                    //      To add content just 'update' a new element.
+                    let _data = {
+                        id: this._currentId,
+                        oid: this.getParentIdByChildId(this._currentId),
+                        rid: getId(e.detail.type),
+                        type: this.getStoreType(e.detail.type),
+                        content: {}
+                    }
+                    this._saveData(_data);
+                    break;
+            }
+        }
+
+        _onPublish(e) {
+
+        }
+
+        _onDelete(e) {
+            this.$.deleteYes_id.value = '';
+            this.$.dialog_id.id = e.detail.id;
+            this.$.dialog_id.open();
+        }
+
+        _onEdit(e) {
+            this._fetchData({ id: e.detail.id });
+            this.dispatchEvent(new CustomEvent('selected', { detail: { id: e.detail.id }, bubbles: true, composed: true }));
+        }
+
+        _onSave(e) {
+            this._saveData(this.$.form_id.getFormData());
+        }
+
+        _onBack(e) {
+            this._fetchData({ id: this._getPreviousLocation() });
+            this._updatePath('pop');
+        }
+
+        _onReload(e) {
+            this._reload = true;
+            this._fetchData({ id: this._currentId });
+            let _credentials = getData('credentials');
+            this.$.loader_id._fetchData({ id: _credentials.email }, true);
+        }
+
+        _onSelect(e) {
+            this._onEdit(e);
+        }
+
+        _onLoadEnd(e) {
+            this._treeData = this.$.loader_id.getTreeCopy();
+            this._loading = false;
+            let _credentials = getData('credentials');
+            this._onEdit({ detail: { id: _credentials.email } });
+        }
+
+        _onUpdateIndex(e) {
+            console.log('_onUpdateIndex(e)', e.detail);
+            let _r = this.updateNode(this.getNodeCopyById(e.detail.id), 'icons:label');
+            _r = this.removeNodes(_r, 'tEVALUATION');
+            e.detail.callback(JSON.stringify(_r));
+        }
+
+        _onDialogClickAdd(e) {
+            if (this.$.deleteYes_id.value == 'yes') {
+                this._deleteElement(this.$.dialog_id.id);
+            } else {
+                this.$.deleteYes_id.style.border = '1px solid red';
+            }
+            this.$.dialog_id.close();
+        }
+
+        _onDialogClickCancel(e) {
+            this.$.dialog_id.close();
         }
 
     } //class

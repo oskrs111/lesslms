@@ -96,7 +96,7 @@ class NavCard extends PolymerElement {
       </div>
     </paper-card>
     <paper-dialog id="dialog_id" verticalAlign="middle" modal>    
-      <h2>NEW COURSE</h2>
+      <h2>COURSE NAME?</h2>
       <paper-input id="courseName_id" always-float-label label="Course short name:"></paper-input>
       <footer>
       <paper-button on-click="_onDialogClickAdd">ADD</paper-button>
@@ -274,7 +274,7 @@ class NavCard extends PolymerElement {
     }
 
     _onAdd() {
-        if (this.type == 'course') {
+        if (this.type == 'Course') {
             this.$.dialog_id.open();
         } else {
             this.dispatchEvent(new CustomEvent('add', { detail: { type: this.type }, bubbles: true, composed: true }));
@@ -287,6 +287,10 @@ class NavCard extends PolymerElement {
 
     _onReload() {
         this._getData(this.id);
+    }
+
+    _onDelete() {
+        this.dispatchEvent(new CustomEvent('delete', { detail: { id: this.id }, bubbles: true, composed: true }));
     }
 
     _onDialogClickAdd(e) {

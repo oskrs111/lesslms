@@ -173,7 +173,14 @@ Polymer({
         data: {
             type: Object,
             value: function() {
-                return null;
+                return {
+                    children: [],
+                    icon: "icons:query-builder",
+                    id: "default",
+                    name: "default",
+                    open: true,
+                    type: "default"
+                }
             }
         },
 

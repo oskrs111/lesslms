@@ -71,9 +71,21 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
         }
 
         _handleResponse(e) {
-            //console.log('_handleResponse(response)', e.detail.response);        
+            console.log('_handleResponse(response)', e.detail.response);
+            let _credentials = getData('credentials');
             switch (e.detail.response.path) {
                 case '/lms/fetch':
+                    //OSLL: New accounts have not any initial content... 
+                    if (e.detail.response.response.Count == 0) {
+                        this._tree.id = _credentials.email;
+                        this._tree.name = _credentials.email;
+                        this._tree.type = 'root';
+                        this.push2Map(_credentials.email, _credentials.email);
+                        this.push2Pointers(_credentials.email, this._tree); //OSLL: Store the root pointer reference.                            
+                        this.dispatchEvent(new CustomEvent('load-end', { bubbles: true, composed: true }));
+                        this.dispatchEvent(new CustomEvent('select', { detail: { id: _credentials.email }, bubbles: true, composed: true }));
+                        return;
+                    }
                     switch (e.detail.response.response.resolved) {
                         case 'users':
                             for (let i of e.detail.response.response.Items) {
@@ -86,9 +98,9 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
                                 this._tree.id = i.userId.S; //OSLL: Will be allways the same id.
                                 this._tree.name = i.userId.S;
                                 this._tree.type = 'root';
-                                this.push2Map(i.sourceId.S, 'root');
-                                this.push2Pointers('root', this._tree); //OSLL: Store the root pointer reference.                            
-                                console.log('_fetchQuewe.push(i.sourceId)', i.sourceId.S);
+                                this.push2Map(i.sourceId.S, _credentials.email);
+                                this.push2Pointers(_credentials.email, this._tree); //OSLL: Store the root pointer reference.                            
+                                //console.log('_fetchQuewe.push(i.sourceId)', i.sourceId.S);
                             }
                             break;
 
@@ -108,18 +120,17 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
 
                                 } else {
                                     //OSLL: Act only as an index reference.
-                                    //      Here store the parent of current element.
-                                    //this._nodeMap[t.relatedId] = t.sourceId;
+                                    //      Here store the parent of current element.                                    
                                     this.push2Map(t.relatedId.S, t.sourceId.S);
                                     this._fetchQuewe.push(t.relatedId.S);
-                                    console.log('_fetchQuewe.push(t.relatedId)', t.relatedId.S);
+                                    //console.log('_fetchQuewe.push(t.relatedId)', t.relatedId.S);
                                 }
                                 this.progress++;
                             }
-                            //let _parent = this._nodeMap[_new.id];
+
                             let _parent = this.getParentIdByChildId(_new.id);
-                            //let _leaf = this._nodePointers[_parent];
                             let _leaf = this.getNodeById(_parent);
+                            console.log('_leaf.children.push(_new)', _new);
                             _leaf.children.push(_new);
                             break;
                     }
@@ -152,7 +163,7 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
         _fetchQueweShift(id) {
             if (id == this._fetchQueweNext()) {
                 this._fetchQuewe.shift();
-                console.log('_fetchQueweShift(id)', id);
+                //console.log('_fetchQueweShift(id)', id);
             }
         }
     } //class

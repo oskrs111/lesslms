@@ -417,6 +417,7 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
             let _data = {
                 content: _content,
                 id: this._formData.sourceId.S,
+                oid: this.getParentIdByChildId(this._formData.sourceId.S),
                 rid: this._formData.relatedId.S,
                 type: this._formData.type.S
             }
