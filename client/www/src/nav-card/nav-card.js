@@ -53,8 +53,8 @@ class NavCard extends PolymerElement {
         }
 
         p {
-          font-size: 14px;
-          margin: 5px;          
+          font-size: 16px;
+          margin: 1px;          
         }
 
         .card-content p {
@@ -80,8 +80,7 @@ class NavCard extends PolymerElement {
       <paper-card heading="[[title]]" image="[[_image]]">
       <template is="dom-if" if="[[!add]]">              
       <div class="detail-content">      
-        <p>[[detail]]</p>            
-        <p>id: [[id]]</p>  
+        <p>[[detail]]</p>                    
         </div>        
         <div class="card-content">      
         <p>[[abstract]]</p>        
@@ -90,8 +89,7 @@ class NavCard extends PolymerElement {
       <div class="layout horizontal card-toolbar">                        
         <paper-icon-button id="add_id" icon="add-circle"  on-click="_onAdd"></paper-icon-button>
         <paper-icon-button id="reload_id" icon="refresh"  on-click="_onReload"></paper-icon-button>
-        <paper-icon-button id="edit_id" icon="create"     on-click="_onEdit"></paper-icon-button>
-        <paper-icon-button id="publish_id" icon="backup"  on-click="_onPublish"></paper-icon-button>
+        <paper-icon-button id="edit_id" icon="create"     on-click="_onEdit"></paper-icon-button>        
         <paper-icon-button id="delete_id" icon="delete"   on-click="_onDelete"></paper-icon-button>                
       </div>
     </paper-card>
@@ -189,7 +187,8 @@ class NavCard extends PolymerElement {
         let _content = JSON.parse(item.content.S);
         switch (item.type.S) {
             case 'tCOURSE':
-                this.detail = `SUBJECT: ${_content.subject}`;
+                this.title = _content.title;
+                this.detail = _content.subject;
                 this.abstract = _content.abstract;
                 break;
 
@@ -246,12 +245,7 @@ class NavCard extends PolymerElement {
     }
 
     _onTypeChange(val) {
-        //console.log('_onTypeChange(val)', val);
-        if (val == 'course') {
-            this.$.publish_id.style.display = 'block'
-        } else {
-            this.$.publish_id.style.display = 'none'
-        }
+
     }
 
     _onIdChange(val) {
@@ -265,7 +259,6 @@ class NavCard extends PolymerElement {
             this.$.edit_id.style.display = 'none';
             this.$.delete_id.style.display = 'none';
             this.$.reload_id.style.display = 'none';
-            this.$.publish_id.style.display = 'none';
             this.updateStyles({ '--background-color': 'var(--paper-blue-300)' })
             this.updateStyles({ '--card-heigth': '50px' });
         } else {

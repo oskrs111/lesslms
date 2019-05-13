@@ -148,8 +148,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
           <div class="container">
             <div class="top">
                 <h3>[[type]]</h3>
-            </div>
-                <div class="bot">[[_path]]</div>            
+            </div>                         
           </div>
           <paper-button class="header-buttons" on-click="_onSave" raised>SAVE</paper-button>
           <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>                    
@@ -403,8 +402,8 @@ class NavView extends LesslmsMixin(PolymerElement) {
                         for (let i of items) {
                             let _card = JSON.parse(JSON.stringify(_template));
                             let _attributes = JSON.parse(i.attributes.S);
-                            _card.type = 'course';
-                            _card.title = `COURSE: ${_attributes.name.S}`;
+                            _card.type = 'Course';
+                            //_card.title = `COURSE: ${_attributes.name.S}`;
                             _card.id = i.sourceId.S;
                             _r.push(_card);
                         }

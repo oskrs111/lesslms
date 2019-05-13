@@ -111,11 +111,8 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
                                 //OSLL: Store the parent id for current element.                            
                                 if (t.sourceId.S == t.relatedId.S) {
                                     //OSLL: Here not expecting to get more than one item.                                
-                                    //      These nodes contain information.                                                                
-                                    _new.name = this.getLocalType(t.type.S);
-                                    _new.id = t.sourceId.S;
-                                    _new.icon = this.getIcon(t.type.S);
-                                    _new.type = t.type.S;
+                                    //      These nodes contain information.                                                                                                 
+                                    this._nodePrepare(_new, t);
                                     this.push2Pointers(_new.id, _new); //OSLL: Store the pointer reference.
 
                                 } else {
@@ -165,6 +162,54 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
                 this._fetchQuewe.shift();
                 //console.log('_fetchQueweShift(id)', id);
             }
+        }
+
+        _nodePrepare(node, source) {
+            node.id = source.sourceId.S;
+            node.icon = this.getIcon(source.type.S);
+            node.type = source.type.S;
+            let _content = {};
+            switch (node.type) {
+                case 'tCOURSE':
+                    _content = JSON.parse(source.content.S);
+                    node.title = _content.subject;
+                    node.name = _content.title;
+                    break;
+
+                case 'tCONTENT':
+                    node.name = this.getLocalType(node.type);
+                    node.title = 'Index';
+                    break;
+
+                case 'tTOPIC':
+                    _content = JSON.parse(source.content.S);
+                    node.name = _content.title;
+                    node.title = 'Index';
+                    break;
+
+                case 'tCHAPTER':
+                    _content = JSON.parse(source.content.S);
+                    node.name = _content.title;
+                    break;
+
+                case 'tEVALUATION':
+                    node.name = this.getLocalType(node.type);
+                    node.open = false;
+                    break;
+
+                case 'tQUESTION':
+                    node.name = this.getLocalType(node.type);
+                    node.open = false;
+                    break;
+
+                case 'tSOLUTION':
+                    node.name = this.getLocalType(node.type);
+                    break;
+
+                default:
+                    break;
+            }
+
         }
     } //class
 

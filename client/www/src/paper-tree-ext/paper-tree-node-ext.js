@@ -26,6 +26,7 @@ Custom property | Description | Default
   then delete this comment!
 */
 import { Polymer } from '../../node_modules/@polymer/polymer/polymer-legacy.js';
+import '../../node_modules/@polymer/iron-flex-layout/iron-flex-layout-classes.js';
 import '../../node_modules/@polymer/paper-icon-button/paper-icon-button.js';
 import '../../node_modules/@polymer/paper-menu-button/paper-menu-button.js';
 import '../../node_modules/@polymer/paper-listbox/paper-listbox.js';
@@ -35,6 +36,7 @@ const $_documentContainer = document.createElement('template');
 //https://www.webcomponents.org/element/@polymer/iron-icons/demo/demo/index.html
 $_documentContainer.innerHTML = `<dom-module id="paper-tree-node">
 <template>
+    <style is="custom-style" include="iron-flex iron-flex-alignment"></style>  
     <style>
         :host {
             font-size: 100%;
@@ -92,11 +94,22 @@ $_documentContainer.innerHTML = `<dom-module id="paper-tree-node">
         .node-icon {
             cursor: pointer;
             width: 24px;
-            height: 24px;
+            height: 24px;            
             @apply(--paper-tree-icon-theme);
         }
 
-        .node-name {
+        .node-name {            
+            font-size: 14px;
+        }
+
+        .node-title {
+            font-size: 12px;
+            color: grey;
+        }
+
+        .node-wrap {
+            @apply --layout-vertical;
+            display: inline-flex;
             border-bottom: var(--item-border);
         }
 
@@ -124,7 +137,10 @@ $_documentContainer.innerHTML = `<dom-module id="paper-tree-node">
             <div class="node-row">
                 <span class\$="{{_computeClass(data.*)}}" on-click="toggleChildren"></span>
                 <iron-icon class="node-icon" icon\$="{{_computeIcon(data.icon)}}" on-click="select"></iron-icon>
-                <span class="node-name" on-click="select">{{data.name}}</span>
+                <div class="node-wrap" on-click="select">
+                <span class="node-name">{{data.name}}</span>
+                <span class="node-title">{{data.title}}</span>
+                </div>
 
                 <template is="dom-if" if="{{actions}}">
                     <paper-menu-button>
@@ -178,6 +194,7 @@ Polymer({
                     icon: "icons:query-builder",
                     id: "default",
                     name: "default",
+                    title: "default",
                     open: true,
                     type: "default"
                 }
@@ -269,6 +286,7 @@ Polymer({
     },
 
     _onSelected: function(e) {
+        if (this.data == undefined) return;
         if (e.detail.id == this.data.id) {
             this.updateStyles({ '--iron-icon-stroke-color': 'var(--item-selected)' });
             this.updateStyles({ '--item-border': 'var(--item-selected-border)' });

@@ -116,6 +116,10 @@ export const LesslmsMixin = (superClass) => {
                         break;
 
                     case 'tEVALUATION':
+                        return 'icons:assessment';
+                        break;
+
+                    case 'tQUESTION':
                         return 'icons:assignment';
                         break;
 
