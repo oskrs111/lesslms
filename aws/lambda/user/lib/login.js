@@ -69,7 +69,8 @@ function _login(args) {
                     _callback(null, { statusCode: 200, body: JSON.stringify({ 
                         accessToken: accessToken,
                         profile: result.idToken.payload.profile,
-                        email: result.idToken.payload.email
+                        email: result.idToken.payload.email,
+                        region: result.idToken.payload.zoneinfo
                     })});
                     /* Use the idToken for Logins Map when Federating User Pools with identity pools or when passing through an Authorization Header to an API Gateway Authorizer
                     var idToken = result.idToken.jwtToken;
