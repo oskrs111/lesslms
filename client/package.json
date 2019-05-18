@@ -1,29 +1,29 @@
 {
-  "name": "lesslms-client",
-  "productName": "lesslms-client",
-  "version": "0.0.1",
-  "description": "Desktop client application for lesslms LMS",
-  "main": "main.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "electron",
-    "serverless",
-    "node.js",
-    "lms",
-    "polymer"
-  ],
-  "author": "Oscar Sanz Llopis",
-  "license": "MIT",
-  "dependencies": {
-    "electron": "^5.0.1"
-  },
-  "build": {
-  "appId": "com.lesslms.client",
-  "copyright":"Copyright Oscar Sanz Llopis © 2018",
-  "directories": {
-  "output": "release"
-  }
-}
+    "name": "lesslms-client",
+    "productName": "lesslms-client",
+    "version": "0.0.1",
+    "description": "Desktop client application for lesslms LMS",
+    "main": "main.js",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "electron",
+        "serverless",
+        "node.js",
+        "lms",
+        "polymer"
+    ],
+    "author": "Oscar Sanz Llopis",
+    "license": "MIT",
+    "dependencies": {
+        "electron": "^5.0.1"
+    },
+    "build": {
+        "appId": "com.lesslms.client",
+        "copyright": "Copyright Oscar Sanz Llopis © 2018",
+        "directories": {
+            "output": "release"
+        }
+    }
 }
