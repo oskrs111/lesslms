@@ -984,7 +984,7 @@
         }
     },
     "Outputs": {
-        "rootUri": {
+        "ApiGatewayUri": {
             "Description": "Root URL of the lesslms API gateway",
             "Value": {
                 "Fn::Join": ["", [
@@ -1007,10 +1007,9 @@
         "cognitoPool": {
             "Description": "Cognito Pool lesslms reference",
             "Value": {
-                "Fn::Join": ["", ["{",
-                    "\"ClientId\":", "\"", { "Ref": "lmsCognitoClient" }, "\"", ",",
-                    "\"UserPoolId\":", "\"", { "Ref": "lmsCognitoPool" }, "\"",
-                    "}"
+                "Fn::Join": ["", [
+					"{ \"ClientId\":  \"",{ "Ref": "lmsCognitoClient" },"\" ,",                    
+                    "  \"UserPoolId\":\"",{ "Ref": "lmsCognitoPool" }  ,"\" }"
                 ]]
             }
         }

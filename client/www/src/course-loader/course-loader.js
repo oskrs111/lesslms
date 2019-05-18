@@ -16,6 +16,8 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
             document.addEventListener('get', (e) => { this._onGet(e) });
             document.addEventListener('fetch', (e) => { this._onFetch(e) });
             this._fetchQuewe = [];
+            this._fetchDelay = 0;
+            this._fetchInterval = 500;
             this._tree = this.clearReferences();
         }
 
@@ -33,6 +35,7 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
       contentType="application/json"
       handle-as="json"
       on-response="_handleResponse"
+      on-error="_handleError"
       debounce-duration="300">
       </iron-ajax>   
     `;
@@ -67,7 +70,12 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
             this.$.ajax_id.body = {};
             this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
             this.$.ajax_id.params = params;
-            this.$.ajax_id.generateRequest();
+            try {
+                this.$.ajax_id.generateRequest();
+            } catch (e) {
+                this._handleError(e);
+            }
+            this._fetchDelay = new Date().getTime();
         }
 
         _handleResponse(e) {
@@ -139,13 +147,25 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
 
             let _next = this._fetchQueweNext();
             if (_next != null) {
-                this._fetchData({ id: _next }, false);
+                let _now = new Date().getTime();
+                let _diff = (_now - this._fetchDelay);
+                //OSLL: Here control the request rate.
+                if (_diff > this._fetchInterval) {
+                    this._fetchData({ id: _next }, false);
+                } else {
+                    setTimeout(() => {
+                        this._fetchData({ id: _next }, false);
+                    }, (this._fetchInterval - _diff));
+                }
                 this.dispatchEvent(new CustomEvent('load-updated', { bubbles: true, composed: true }));
             } else {
                 this.dispatchEvent(new CustomEvent('load-end', { bubbles: true, composed: true }));
-                //this.dispatchEvent(new CustomEvent('collapse', { bubbles: true, composed: true }));
                 this.progress = 0;
             }
+        }
+
+        _handleError(e) {
+            console.log('_handleError(e)', e);
         }
 
         _fetchQueweNext() {
@@ -194,11 +214,14 @@ class CourseLoader extends LesslmsMixin(PolymerElement) {
 
                 case 'tEVALUATION':
                     node.name = this.getLocalType(node.type);
+                    node.title = 'Index';
                     node.open = false;
                     break;
 
                 case 'tQUESTION':
+                    _content = JSON.parse(source.content.S);
                     node.name = this.getLocalType(node.type);
+                    node.title = `Number:${_content.number}, Value:${_content.value}`;
                     node.open = false;
                     break;
 

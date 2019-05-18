@@ -219,11 +219,11 @@ class PaperLoginscreen extends PolymerElement {
 
     _login() {
         if (this.$.userInput.validate() && this.$.uriInput.validate() && this.$.passInput.validate()) {
-            this.dispatchEvent(new CustomEvent('login-btn-click', { bubbles: true, composed: true }));
             setData_L('username', this.username);
             setData_L('password', this.password);
             setData_L('uri', this.uri);
             this.loading = true;
+            this.dispatchEvent(new CustomEvent('login-btn-click', { bubbles: true, composed: true }));
         }
     }
 

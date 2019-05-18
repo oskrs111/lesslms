@@ -1,5 +1,5 @@
 import { html, PolymerElement } from '../../node_modules/@polymer/polymer/polymer-element.js';
-import { getData_L, setData, getData } from '../lesslms-frontend-app/lesslms-common.js';
+import { getData_L, setData } from '../lesslms-frontend-app/lesslms-common.js';
 import '../../node_modules/@polymer/paper-spinner/paper-spinner-lite.js';
 import '../../node_modules/@polymer/iron-ajax/iron-ajax.js';
 import '../paper-loginscreen-ext/paper-loginscreen-ext.js';
@@ -62,11 +62,11 @@ class LoginView extends PolymerElement {
         return {
             username: {
                 type: String,
-                value: '@gmail.com'
+                value: ''
             },
             password: {
                 type: String,
-                value: '123456'
+                value: ''
             },
             _uri: {
                 type: String,
@@ -77,12 +77,21 @@ class LoginView extends PolymerElement {
 
     _onLogin() {
         this.$.ajax_id.params = { user: this.username, pass: this.password };
-        this.$.ajax_id.generateRequest();
+        try {
+            this.$.ajax_id.generateRequest();
+        } catch (e) {
+            this._handleError(e);
+        }
     }
 
     _handleResponse(e) {
         setData('credentials', e.detail.response);
         this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
+    }
+
+    _handleError(e) {
+        console.log('_handleError(e)', e);
+        window.alert(JSON.stringify(e));
     }
 
 }

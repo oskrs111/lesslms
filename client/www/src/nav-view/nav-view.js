@@ -151,7 +151,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
             </div>                         
           </div>
           <paper-button class="header-buttons" on-click="_onSave" raised>SAVE</paper-button>
-          <paper-icon-button icon="refresh" on-click="_onReload"></paper-icon-button>                    
+          <paper-icon-button icon="refresh" on-click="initialLoad"></paper-icon-button>                    
         </header>        
         <section class="layout horizontal center-center">       
         <div class="left layout vertical">  
@@ -196,6 +196,7 @@ class NavView extends LesslmsMixin(PolymerElement) {
       contentType="application/json"
       handle-as="json"
       on-response="_handleResponse"
+      on-error="_handleError"
       debounce-duration="300">
       </iron-ajax>
     `;
@@ -326,7 +327,11 @@ class NavView extends LesslmsMixin(PolymerElement) {
             this._cardCount = 0;
             this._cardData = [];
             this._addData = [];
-            this.$.ajax_id.generateRequest();
+            try {
+                this.$.ajax_id.generateRequest();
+            } catch (e) {
+                this._handleError(e);
+            }
             this._loading = true;
         }
 
@@ -343,7 +348,11 @@ class NavView extends LesslmsMixin(PolymerElement) {
                 region: _credentials.region,
                 id: getId('Course')
             });
-            this.$.ajax_id.generateRequest();
+            try {
+                this.$.ajax_id.generateRequest();
+            } catch (e) {
+                this._handleError(e);
+            }
             this._loading = true;
         }
 
@@ -359,7 +368,11 @@ class NavView extends LesslmsMixin(PolymerElement) {
                 type: this.getNodeById(id).type,
                 region: _credentials.region
             });
-            this.$.ajax_id.generateRequest();
+            try {
+                this.$.ajax_id.generateRequest();
+            } catch (e) {
+                this._handleError(e);
+            }
             this._loading = true;
         }
 
@@ -372,7 +385,11 @@ class NavView extends LesslmsMixin(PolymerElement) {
             this.$.ajax_id.headers['accessToken'] = _credentials.accessToken;
             this.$.ajax_id.body = JSON.stringify(data);
             this.$.ajax_id.params = {};
-            this.$.ajax_id.generateRequest();
+            try {
+                this.$.ajax_id.generateRequest();
+            } catch (e) {
+                this._handleError(e);
+            }
             this._loading = true;
         }
 
@@ -400,6 +417,8 @@ class NavView extends LesslmsMixin(PolymerElement) {
                         this._reload = false;
 
                         for (let i of items) {
+                            i.type = { S: 'tROOT' };
+                            this.$.form_id.setFormData(i);
                             let _card = JSON.parse(JSON.stringify(_template));
                             let _attributes = JSON.parse(i.attributes.S);
                             _card.type = 'Course';
@@ -493,6 +512,10 @@ class NavView extends LesslmsMixin(PolymerElement) {
                 default:
                     break;
             }
+        }
+
+        _handleError(e) {
+            console.log('_handleError(e)', e);
         }
 
         _onProgressChange(val) {

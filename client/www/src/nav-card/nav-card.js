@@ -107,6 +107,7 @@ class NavCard extends PolymerElement {
     contentType="application/json"
     handle-as="json"
     on-response="_handleResponse"
+    on-error="_handleError"
     debounce-duration="300">
     </iron-ajax>
     `;
@@ -182,6 +183,10 @@ class NavCard extends PolymerElement {
         }
     }
 
+    _handleError(e) {
+        console.log('_handleError(e)', e);
+    }
+
     _updateContent(item) {
         //console.log('_updateContent(item)', item);
         let _content = JSON.parse(item.content.S);
@@ -195,36 +200,29 @@ class NavCard extends PolymerElement {
             case 'tCONTENT':
                 this.title = item.type.S.substring(1, item.type.S.length);
                 if (_content.index != undefined) {
-                    //OSLL: Show index here...
+                    this.abstract = _content.index.children.length + ' items.'
                 } else this.abstract = 'No Index avaliable.';
                 break;
 
             case 'tTOPIC':
                 this.title = item.type.S.substring(1, item.type.S.length);
-                this.detail = `TITLE: ${_content.title}`;
+                this.detail = _content.title;
                 if (_content.index != undefined) {
-                    //OSLL: Show index here...
+                    this.abstract = _content.index.children.length + ' items.'
                 } else this.abstract = 'No Index avaliable.';
                 break;
 
             case 'tCHAPTER':
                 this.title = item.type.S.substring(1, item.type.S.length);
-                this.detail = `TITLE: ${_content.title}`;
+                this.detail = _content.title;
                 this.abstract = _content.content;
-                break;
-
-            case 'tDEFINITION':
-                this.title = item.type.S.substring(1, item.type.S.length);
-                this.detail = `TITLE: ${_content.title}`;
-                this.abstract = `AUTHOR: ${_content.author}<br>
-                                 VERSION: ${_content.version}<br>
-                                 DATE: ${_content.date}`;
                 break;
 
             case 'tEVALUATION':
                 this.title = item.type.S.substring(1, item.type.S.length);
-                //this.detail = `TITLE: ${_content.title}`;
-                this.abstract = _content.abstract;
+                if (_content.index != undefined) {
+                    this.abstract = _content.index.children.length + ' items.'
+                } else this.abstract = 'No Index avaliable.';
                 break;
 
             case 'tQUESTION':

@@ -20,7 +20,7 @@ stageVariables: null
  */
 
 let AWS = require("aws-sdk");
-let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10', region: 'eu-west-1'});
+let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10'});
 
 let _gen = {};
 let _gene = {};
@@ -33,6 +33,8 @@ let _gene = {};
  * @description This function first appends new course both to 'users' table and 'courses' table.
  */
 function add(args, callback){
+     console.log('add',args, typeof args);
+     AWS.config.update({region: args.params.region});
     _gene = _execute(args.params, (error, result) => {
          if(error) callback(error);
          else callback(null, result);
@@ -119,6 +121,7 @@ function* _course_proc(params, callback){
  let _d = new Date().getTime() + '';
  let _params = {
   ExpressionAttributeNames: {
+   "#ORI": "originId",
    "#TYP": "type",
    "#CD": "cDate",
    "#MD": "mDate",
@@ -137,6 +140,9 @@ function* _course_proc(params, callback){
     ":c": {
      S: JSON.stringify({subject:"", abstract:""})
     },
+     ":o":{
+     S: _body.user
+    } 
   }, 
   Key: {
    "sourceId": {
@@ -148,7 +154,7 @@ function* _course_proc(params, callback){
   }, 
   ReturnValues: "ALL_NEW", 
   TableName: "courses", 
-  UpdateExpression: "SET #TYP = :t, #CD = :cd, #MD = :md, #CON = :c"
+  UpdateExpression: "SET #TYP = :t, #CD = :cd, #MD = :md, #CON = :c, #ORI = :o"
  };
  
  console.log('add:', _params);

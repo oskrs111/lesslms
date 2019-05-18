@@ -3,15 +3,19 @@ logs
 *.log
 *.zip
 *.rar
+*.pak
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
 #lesslms deployment
+script/chrome
+client/release/**
+client/www/build
+client/www/.vscode
 release/aws/formation/*
 release/aws/lambda/*
-client/www/build
-client/www/chrome
+release/aws/client/*
 
 # Runtime data
 pids

@@ -6,9 +6,13 @@ exports.handler = function(event, context, callback) {
     let _args = {};
     let _exec = {};
     
+    console.log('lmsLambda >>>', event.pathParameters)
     switch(event.pathParameters.proxy){
+        
+        //OSLL: POST requests
         case 'add':
-        case 'update':    
+        case 'update':   
+        case 'delete':    
             _args.params = event.body;
             _exec = require(`./lib/${event.pathParameters.proxy}`);
             _exec(_args, (error, response) => {
@@ -21,7 +25,9 @@ exports.handler = function(event, context, callback) {
                 }
             });
             break;
-            
+        
+        //OSLL: GET requests    
+        case 'get':
         case 'fetch':
             _args.params = event.queryStringParameters;
             _exec = require(`./lib/${event.pathParameters.proxy}`);
@@ -43,6 +49,8 @@ exports.handler = function(event, context, callback) {
 };
 
 function _doCallback(error, response){
+    
+    console.log('lmsLambda >>> callback', error, response);
     if(error != undefined){
          let _response = {
         statusCode: error.error,
