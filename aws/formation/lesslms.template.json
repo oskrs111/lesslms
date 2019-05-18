@@ -230,7 +230,10 @@
                         "Arn"
                     ]
                 },
-                "Runtime": "nodejs8.10"
+                "Runtime": "nodejs8.10",
+				"MemorySize": "512",
+				"Timeout": "10"
+				
             }
         },
         "xapiLambda": {

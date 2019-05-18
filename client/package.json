@@ -1,7 +1,7 @@
 {
     "name": "lesslms-client",
     "productName": "lesslms-client",
-    "version": "0.0.1",
+    "version": "0.0.2",
     "description": "Desktop client application for lesslms LMS",
     "main": "main.js",
     "scripts": {

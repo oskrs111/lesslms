@@ -47,7 +47,7 @@ class LoginView extends PolymerElement {
 
       </style>
       <div class="flex-wrap">        
-        <paper-loginscreen title="lesslms" subtitle="Login" username="{{username}}" password="{{password}}"></paper-loginscreen>        
+        <paper-loginscreen title="lesslms" subtitle="Login" username="{{username}}" password="{{password}}" uri={{uri}}></paper-loginscreen>        
       </div>      
       <iron-ajax id="ajax_id"
       method="GET"  
@@ -68,16 +68,21 @@ class LoginView extends PolymerElement {
                 type: String,
                 value: ''
             },
+            uri: {
+                type: String,
+                value: ''
+            },
             _uri: {
                 type: String,
-                value: function() { return getData_L('uri') + 'user/login' },
-            },
+                value: ''
+            }
         };
     }
 
     _onLogin() {
         this.$.ajax_id.params = { user: this.username, pass: this.password };
         try {
+            this._uri = this.uri + 'user/login';
             this.$.ajax_id.generateRequest();
         } catch (e) {
             this._handleError(e);
@@ -86,7 +91,10 @@ class LoginView extends PolymerElement {
 
     _handleResponse(e) {
         setData('credentials', e.detail.response);
-        this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
+        //OSLL: Give some time to SessionStorage to process the credentials storage.
+        setTimeout(() => {
+            this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
+        }, 100);
     }
 
     _handleError(e) {

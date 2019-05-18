@@ -1,6 +1,6 @@
 {
   "name": "lesslms-frontend",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "main": "main.js",
   "dependencies": {
     "@polymer/iron-ajax": "^3.0.1",

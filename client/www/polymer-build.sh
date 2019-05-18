@@ -1,0 +1,2 @@
+#!/bin/bash
+polymer build
