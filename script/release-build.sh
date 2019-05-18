@@ -4,6 +4,7 @@
  7z a "..\release\aws\lambda\lms.zip" "..\aws\lambda\lms\*" 
  7z a "..\release\aws\lambda\user.zip" "..\aws\lambda\user\*" 
  7z a "..\release\aws\lambda\xapi.zip" "..\aws\lambda\xapi\*" 
+ 7z a "..\release\aws\client\lesslms-client-win32-x64.zip" "..\client\lesslms-client-win32-x64\*" 
  7z a "..\release\aws.zip" "..\release\aws" 
  
  

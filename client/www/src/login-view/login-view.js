@@ -77,12 +77,21 @@ class LoginView extends PolymerElement {
 
     _onLogin() {
         this.$.ajax_id.params = { user: this.username, pass: this.password };
-        this.$.ajax_id.generateRequest();
+        try {
+            this.$.ajax_id.generateRequest();
+        } catch (e) {
+            this._handleError(e);
+        }
     }
 
     _handleResponse(e) {
         setData('credentials', e.detail.response);
         this.dispatchEvent(new CustomEvent('login-success', { bubbles: true, composed: true }));
+    }
+
+    _handleError(e) {
+        console.log('_handleError(e)', e);
+        window.alert(JSON.stringify(e));
     }
 
 }

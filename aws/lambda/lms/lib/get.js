@@ -11,15 +11,15 @@ let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10' });
 let _gen = {};
 let _gene = {};
 /**
- * Funtion to fetch data from DynamoDB.
+ * Funtion to get single item from DynamoDB.
  * @function
  * @param {Object} args Input arguments for the function.
  * @param {string} args.params call parameters from client application.
  * @callback callback Return callback function.
  * @description This function recovers data from 'courses' table or 'users' table by looking to '@' character in the request 'id' attribute.
  */
-function fetch(args, callback){
-     console.log('fetch',args, typeof args);
+function get(args, callback){
+     console.log('get',args, typeof args);
      AWS.config.update({region: args.params.region});
     _gene = _execute(args.params, (error, result) => {
          console.log('fetch::_execute:', result);    
@@ -32,7 +32,7 @@ function fetch(args, callback){
 
 function* _execute(params, callback){
     let _r = {};
-    _gen = _fetch_proc(params, (error, result) => {
+    _gen = _get_proc(params, (error, result) => {
          if(error){
             callback(error);  
             _gene.return(false);
@@ -47,35 +47,24 @@ function* _execute(params, callback){
     yield;    
 }
 
-function* _fetch_proc(params, callback){
+function* _get_proc(params, callback){
 
- console.log('fetch:_fetch_proc', params, typeof params);
- 
- let _table = '';
- let _key = '';
- if(params.id.indexOf('@') > 0){
-   _table = 'users';
-   _key = 'userId';
- } 
- else{
-    _table = 'courses';
-    _key = 'sourceId';
- } 
+ console.log('get:_get_proc', params, typeof params);
  
  let _params = {
-    TableName : _table,
-    KeyConditionExpression: "#src = :src",
-    ExpressionAttributeNames:{
-        "#src": _key
-    },
-    ExpressionAttributeValues: {
-        ":src": {'S': params.id}
+    TableName : 'courses',
+    Key: {
+   "sourceId": {
+     S: params.id
+    }, 
+   "relatedId": {
+     S: params.id
     }
+  }, 
  };
  
- console.log('fetch:', _params);
- 
- dynamodb.query(_params, function(err, data) {
+ console.log('get:', _params);
+ dynamodb.getItem(_params, function(err, data) {
     if (err) {
         console.log('dynamodb.query:', err);
         _gen.return(false);
@@ -84,11 +73,10 @@ function* _fetch_proc(params, callback){
     else{
     console.log('dynamodb.query:', data);    
       _gen.return(true);
-      data.resolved = _table;
       callback(null, data);  
     } 
  });    
  yield;
 }
 
-module.exports = fetch;
+module.exports = get;

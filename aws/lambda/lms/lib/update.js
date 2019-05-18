@@ -6,7 +6,7 @@
  */
 
 let AWS = require("aws-sdk");
-let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10', region: 'eu-west-1'});
+let dynamodb = new AWS.DynamoDB({apiVersion: '2012-08-10' });
 
 let _gen = {};
 let _gene = {};
@@ -19,6 +19,8 @@ let _gene = {};
  * @description This function first appends new course both to 'users' table and 'courses' table.
  */
 function update(args, callback){
+     console.log('update',args, typeof args);
+     AWS.config.update({region: args.params.region});
     _gene = _execute(args.params, (error, result) => {
          if(error) callback(error);
          else callback(null, result);
@@ -28,8 +30,24 @@ function update(args, callback){
 
 
 function* _execute(params, callback){
+    let _body = JSON.parse(params);  
     let _r = {};
-    _gen = _update_proc(params, (error, result) => {
+    _gen = _update_proc(_body, (error, result) => {
+         if(error){
+            callback(error);  
+            _gene.return(false);
+         } 
+         else {
+             _r.update = result;
+             _gene.next();
+         }
+    });
+    _gen.next();
+    yield;
+    
+    //OSLL: Every object adds two registers
+    _body.id = _body.rid;
+    _gen = _update_proc(_body, (error, result) => {
          if(error){
             callback(error);  
             _gene.return(false);
@@ -41,47 +59,52 @@ function* _execute(params, callback){
          }
     });
     _gen.next();
-    yield;
+    yield;    
+    
 }
 
 function* _update_proc(params, callback){
- let _body = JSON.parse(params);     
- console.log('update:_user_proc', _body, typeof _body);
+    
+ console.log('update:_user_proc', params, typeof _body);
  
  let _d = new Date().getTime() + '';
  let _params = {
   ExpressionAttributeNames: {
+   "#OID": "originId",
    "#TYP": "type",
    "#MD": "mDate",
    "#CON": "content"
   }, 
   ExpressionAttributeValues: {
    ":t": {
-     S:  _body.type
+     S:  params.type
     },
    ":md": {
      S:  _d
     },
     ":c": {
-     S: JSON.stringify(_body.content)
+     S: JSON.stringify(params.content)
     },
+       ":oid": {
+     S:  params.oid
+    }
   }, 
   Key: {
    "sourceId": {
-     S: _body.id
+     S: params.id
     }, 
    "relatedId": {
-     S: _body.rid
+     S: params.rid
     }
   }, 
   ReturnValues: "ALL_NEW", 
   TableName: "courses", 
-  UpdateExpression: "SET #TYP = :t, #MD = :md, #CON = :c"
+  UpdateExpression: "SET #TYP = :t, #MD = :md, #CON = :c, #OID = :oid"
  };
  
- if(_body.cd != undefined){
+ if(params.cd != undefined){
   _params.ExpressionAttributeValues[":cd"] = {
-     S:  _body.cd
+     S:  params.cd
     };
     
   _params.ExpressionAttributeNames["#CD"] = "cDate";  
@@ -97,7 +120,7 @@ function* _update_proc(params, callback){
         callback(err);
     }
     else{
-      _gen.return(true);
+      _gen.next();
       callback(null, data);
     } 
  });    

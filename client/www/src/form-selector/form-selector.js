@@ -42,7 +42,8 @@ const _formTypeMap = {
         _arg2: 'content'
     },
     Evaluation: {
-        _arg1: 'abstract'
+        _arg1: 'abstract',
+        _obj1: 'index'
     },
     Question: {
         _arg1: 'type',
@@ -208,6 +209,14 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
       </section>       
 
       <section id="evaluation_form_id">    
+        <div class="form-row-space">
+        <h2>INDEX:</h2>
+        <paper-button class="header-buttons" on-click="_onUpdateEvaluationIndex" raised>UPDATE INDEX</paper-button>
+        </div>              
+        <div class="form-row">
+        <paper-tree data="[[_obj1]]">
+        </paper-tree>    
+        </div>          
         <div class="form-row">     
             <paper-radio-group selected="{{_viewMode}}">
             <paper-radio-button name="txt">Text</paper-radio-button>
@@ -367,7 +376,7 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
             //OSLL: Use '_formTypeMap' to get form fields data,
             let _map = _formTypeMap[this.type];
             switch (this.type) {
-                case 'root':
+                case 'Root':
                     break;
 
                 case 'Course':
@@ -394,6 +403,7 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
                     break;
 
                 case 'Evaluation':
+                    _content[_map['_obj1']] = this._obj1;
                     _content[_map['_arg1']] = this._arg1;
                     break;
 
@@ -441,6 +451,7 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
         }
 
         _onTypeChange(val) {
+            console.log('_onTypeChange(val)', val);
             this.clearFormData();
             let _forms = this.$.wrapper_id.getElementsByTagName('section');
             for (let f of _forms) {
@@ -452,11 +463,11 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
                 _content = JSON.parse(this._formData.content.S);
             }
             switch (val) {
-                case 'root':
+                case 'Root':
                     let _credentials = getData('credentials');
                     //OSLL: Use '_formTypeMap' to set form fields
-                    this._arg1 = _credentials[_map['_arg1']];
-                    this._arg2 = _credentials[_map['_arg2']];
+                    this._arg1 = this._formData.userId.S;
+                    this._arg2 = JSON.parse(this._formData.attributes.S).profile;
                     this.$.root_form_id.style.display = 'block';
                     break;
 
@@ -489,6 +500,7 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
 
                 case 'Evaluation':
                     this._arg1 = _content[_map['_arg1']];
+                    this._obj1 = _content[_map['_obj1']];
                     this.$.evaluation_form_id.style.display = "block";
                     break;
 
@@ -524,7 +536,12 @@ class FormSelector extends LesslmsMixin(PolymerElement) {
         }
 
         _onUpdateTopicIndex() {
-            //OSLL: Both forms use the same '_obj1' container.
+            //OSLL: All forms use the same '_obj1' container for index.
+            this._onUpdateContentIndex();
+        }
+
+        _onUpdateEvaluationIndex() {
+            //OSLL: All forms use the same '_obj1' container index.
             this._onUpdateContentIndex();
         }
 

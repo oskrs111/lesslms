@@ -1,8 +1,9 @@
 {
   "name": "lesslms-client",
+  "productName": "lesslms-client",
   "version": "0.0.1",
   "description": "Desktop client application for lesslms LMS",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -16,6 +17,5 @@
   "author": "Oscar Sanz Llopis",
   "license": "MIT",
   "dependencies": {
-    "electron": "^4.1.4"
   }
 }
