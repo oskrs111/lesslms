@@ -17,7 +17,7 @@
     "author": "Oscar Sanz Llopis",
     "license": "MIT",
     "dependencies": {
-        "electron": "^5.0.1"
+        "electron": "^15.5.5"
     },
     "build": {
         "appId": "com.lesslms.client",
